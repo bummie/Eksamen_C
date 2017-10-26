@@ -37,7 +37,7 @@ NODE* loadNodesFromFile(char* filePath)
 	size_t iLineLength;
 	char cReadStatus;
 	
-	while(cReadStatus = getline(sBuffer, &iLineLength, fFile) != -1)
+	while(cReadStatus = getline(&sBuffer, &iLineLength, fFile) != -1)
 	{
 		printf("Line: %s", sBuffer);
 		parseNodeData(sBuffer);
@@ -96,7 +96,6 @@ int findNodeCountInString(char* pszNodeData)
 	int iNodeCount = 0;
 	for(int i = 0; i < strlen(pszNodeData); i++)
 	{
-		printf("%c\n", pszNodeData[i]);
 		if(pszNodeData[i] == '.')
 			iNodeCount++;
 		if(pszNodeData[i] == ' ')
