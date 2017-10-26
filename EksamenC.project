@@ -94,5 +94,6 @@
   </Settings>
   <VirtualDirectory Name="src">
     <File Name="main.c"/>
+    <File Name="nodehandler.c"/>
   </VirtualDirectory>
 </CodeLite_Project>
