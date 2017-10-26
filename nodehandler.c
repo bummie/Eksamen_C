@@ -90,43 +90,44 @@ int parseNodeData(char* pszNodeData)
 	
 	int iNodeCount = findNodeCountInString(pszNodeData);
 	printf("NodeCount: %d\n", iNodeCount);
-	findNodeNames(pszNodeData, iNodeCount);
+	char* nodeNames = findNodeNames(pszNodeData, iNodeCount);
+	for(int i = 0; i < iNodeCount; i++)
+	{
+		printf("%s\n", &nodeNames[i*256]);
+	}
+	printf("\n");
+	
+	free(nodeNames);
 	return 1;
 }
 
+//TODO: Clean up
 char* findNodeNames(char* pszNodeData, int iNodeCount)
 {
-	char* asNodeNames[iNodeCount];
+	char* asNodeNames = malloc(iNodeCount * 256);
 	char cBuffer[256];
 	int iCurrentNode = 0;
 	int iBufferIndex = 0;
 
 	for(int i = 0; i < strlen(pszNodeData); i++)
 	{
-		if(pszNodeData[i] == ' ')
-			break;
-		if(pszNodeData[i] == '.')
+		if(pszNodeData[i] == '.' || pszNodeData[i] == ' ')
 		{
 			cBuffer[iBufferIndex] = '\0';
-			asNodeNames[iCurrentNode] = &cBuffer[0];
+			memcpy(&asNodeNames[iCurrentNode*256], &cBuffer[0], strlen(&cBuffer[0]) + 1 );
+			//asNodeNames[iCurrentNode] = &cBuffer[0];
+			if(pszNodeData[i] == ' ')
+				break;
+			
 			iBufferIndex = 0;
 			iCurrentNode++;
 		}else
 		{
 			cBuffer[iBufferIndex] = pszNodeData[i];
 			iBufferIndex++;
-			printf("%c", pszNodeData[i]);
 		}
 	}
-	
-	for(int i = 0; i < iNodeCount; i++)
-	{
-		printf("\n%s", asNodeNames[i]);
-	}
-	
-	printf("\n");
-	
-	return NULL;
+	return asNodeNames;
 }
 
 int findNodeCountInString(char* pszNodeData)
