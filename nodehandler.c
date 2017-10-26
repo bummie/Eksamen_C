@@ -20,6 +20,7 @@ FILE* loadFile(char* filePath);
 NODE* loadNodesFromFile(char* filePath);
 int findNodeCountInString(char* pszNodeData);
 int parseNodeData(char* pszNodeData);
+char** findNodeNames(char* pszNodeData, int iNodeCount);
 
 int main(int argc, char **argv)
 {
@@ -87,13 +88,37 @@ int parseNodeData(char* pszNodeData)
 	if(pszNodeData == NULL)
 		return 0;
 	
-	printf("NodeCount: %d\n", findNodeCountInString(pszNodeData));
+	int iNodeCount = findNodeCountInString(pszNodeData);
+	printf("NodeCount: %d\n", iNodeCount);
+	
 	return 1;
 }
+//TODO: Skrive om findNodeNames
+/*
+char** findNodeNames(char* pszNodeData, int iNodeCount)
+{
+	char* asNodeNames[iNodeCount];
+	char cBuffer[256];
+	int iIncrementer = 0;
+	for(int i = 0; i < iNodeCount; i++)
+	{
+		int iIncrementBuffer = 0;	
+		while(pszNodeData[iIncrementer] != ' ' || pszNodeData[iIncrementer] != '.' )	
+		{
+			cBuffer[iIncrementBuffer] = pszNodeData[iIncrementer];
+			iIncrementer++;
+			iIncrementBuffer++;
+		}
+		
+	}
+	
+	return asNodeNames;
+}
+*/
 
 int findNodeCountInString(char* pszNodeData)
 {
-	int iNodeCount = 0;
+	int iNodeCount = 1;
 	for(int i = 0; i < strlen(pszNodeData); i++)
 	{
 		if(pszNodeData[i] == '.')
@@ -101,9 +126,6 @@ int findNodeCountInString(char* pszNodeData)
 		if(pszNodeData[i] == ' ')
 			break;
 	}
-	
-	if(iNodeCount > 0)
-		iNodeCount++;
 		
 	return iNodeCount;
 }
