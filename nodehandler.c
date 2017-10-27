@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // Node structure
 typedef unsigned long ULONG;
@@ -97,9 +98,9 @@ int parseNodeData(char* pszNodeData)
 	{
 		printf("%s\n", &nodeNames[i*256]);
 	}
-	printf("\n");
 	char* nodeValue = findNodeValue(pszNodeData); //Atoi to determine wehter int or string
-	printf("Value: %s", nodeValue);
+	printf("Value: %s\n", nodeValue);
+	
 	free(nodeNames);
 	free(nodeValue);
 	return 1;
@@ -138,6 +139,7 @@ char* findNodeValue(char* pszNodeData)
 		}
 	}
 	cBuffer[iBufferIndex] = '\0';
+	memcpy(sNodeValue, &cBuffer[0], strlen(cBuffer) + 1);
 	
 	return sNodeValue;
 }
