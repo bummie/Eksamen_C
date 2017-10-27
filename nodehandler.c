@@ -21,6 +21,7 @@ NODE* loadNodesFromFile(char* filePath);
 int findNodeCountInString(char* pszNodeData);
 int parseNodeData(char* pszNodeData);
 char* findNodeNames(char* pszNodeData, int iNodeCount);
+char* findNodeValue(char* pszNodeData);
 
 int main(int argc, char **argv)
 {
@@ -45,6 +46,7 @@ NODE* loadNodesFromFile(char* filePath)
 	}
 	
 	free(sBuffer);
+	fclose(fFile);
 }
 
 FILE* loadFile(char* filePath)
@@ -96,9 +98,48 @@ int parseNodeData(char* pszNodeData)
 		printf("%s\n", &nodeNames[i*256]);
 	}
 	printf("\n");
-	
+	char* nodeValue = findNodeValue(pszNodeData); //Atoi to determine wehter int or string
+	printf("Value: %s", nodeValue);
 	free(nodeNames);
+	free(nodeValue);
 	return 1;
+}
+
+//TODO: Clean up
+char* findNodeValue(char* pszNodeData)
+{
+	char* sNodeValue = malloc(256);
+	char cBuffer[256];
+	int iBufferIndex = 0;
+	int iFoundCharEquals = 0;
+	int iFoundStartValue = 0;
+	int iFoundStartString = 0;
+	for(int i = 0; i < strlen(pszNodeData); i++)
+	{
+		if(pszNodeData[i] == '=')
+		{
+			iFoundCharEquals = 1;
+			continue;
+		}
+		
+		if(iFoundCharEquals)
+		{
+			// End of stringvalue
+			if(iFoundStartString && pszNodeData[i] == '"'){ break; }
+			
+			if(!iFoundStartString && pszNodeData[i] == '"'){ iFoundStartString = 1; }
+			if(pszNodeData[i] != ' ' && !iFoundStartValue) { iFoundStartValue = 1; }
+				
+			if(iFoundStartValue && pszNodeData[i] != '"')
+			{
+				cBuffer[iBufferIndex] = pszNodeData[i];
+				iBufferIndex++;
+			}
+		}
+	}
+	cBuffer[iBufferIndex] = '\0';
+	
+	return sNodeValue;
 }
 
 //TODO: Clean up
