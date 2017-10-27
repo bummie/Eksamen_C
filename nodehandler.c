@@ -3,6 +3,7 @@
 #include <string.h>
 
 #define NODE_NAME_BUFFER_SIZE 256
+#define NODE_CHILD_SIZE_INCREMENTER 5
 // Node structure
 typedef unsigned long ULONG;
 typedef struct _NODE 
@@ -11,8 +12,8 @@ typedef struct _NODE
 	ULONG ulIntVal; 
 	char* pszString; 
 	int iNodes; 
-	int iSizeChildNodes;
-	struct _NODE* pnNodes[5];
+	int iArraySizeChildNodes;
+	struct _NODE* pnNodes[NODE_CHILD_SIZE_INCREMENTER];
 	
 	//Function pointers
 	struct _NODE* (*GetChildWithKey)(struct _NODE* self, char* key);
@@ -42,8 +43,8 @@ int main(int argc, char **argv)
 		
 	// Init root mode
 	rootNode = newNode("root");
-	loadNodesFromFile(FILEPATH);
-	rootNode->pnNodes[0] = newNode("seb");
+	//loadNodesFromFile(FILEPATH);
+	addNode(rootNode, newNode("seb"));
 	
 	NODE* nodeNameTest = findNodeByKey("seb"); 
 	if(nodeNameTest != NULL)
@@ -63,7 +64,8 @@ NODE* newNode(char* pszName)
 	node->pszString = NULL;
 	node->ulIntVal = NULL;
 	node->iNodes = 0;
-	
+	node->iArraySizeChildNodes = NODE_CHILD_SIZE_INCREMENTER;
+
 	node->GetChildWithKey = NODE_GetChildWithKey;
 	return node;
 }
@@ -71,6 +73,23 @@ NODE* newNode(char* pszName)
 void destructNode(NODE* nNode)
 {
 	free(nNode);
+}
+
+// Adds as a child of another node
+int addNode(NODE* nodeDestination, NODE* node)
+{
+	if(node == NULL) { return 0;};
+	
+	if(nodeDestination->iNodes < nodeDestination->iArraySizeChildNodes)
+	{
+		nodeDestination->pnNodes[nodeDestination->iNodes] = node;
+		nodeDestination->iNodes++;
+	}else
+	{
+		//TODO: Increase nodearray and add
+	}
+	
+	return 1;
 }
 
 NODE* findNodeByKey(char* nodeKey)
@@ -98,7 +117,6 @@ NODE* findNodeByKey(char* nodeKey)
 NODE* NODE_GetChildWithKey(NODE* self, char* sKey)
 {
 	NODE* nodeChild = NULL;
-	
 	for(int i = 0; i < self->iNodes; i++)
 	{
 		NODE* tempNode = self->pnNodes[i];
@@ -219,14 +237,15 @@ char* findNodeNames(char* pszNodeData, int iNodeCount)
 	char cBuffer[NODE_NAME_BUFFER_SIZE];
 	int iCurrentNode = 0;
 	int iBufferIndex = 0;
-
+	int iFoundEndNames = 0;
 	for(int i = 0; i < strlen(pszNodeData); i++)
 	{
 		if(pszNodeData[i] == '.' || pszNodeData[i] == ' ')
 		{
+			iFoundEndNames = 1;
 			cBuffer[iBufferIndex] = '\0';
 			memcpy(&asNodeNames[iCurrentNode*NODE_NAME_BUFFER_SIZE], &cBuffer[0], strlen(&cBuffer[0]) + 1 );
-			//asNodeNames[iCurrentNode] = &cBuffer[0];
+
 			if(pszNodeData[i] == ' ')
 				break;
 			
@@ -237,6 +256,12 @@ char* findNodeNames(char* pszNodeData, int iNodeCount)
 			cBuffer[iBufferIndex] = pszNodeData[i];
 			iBufferIndex++;
 		}
+	}
+	
+	if(!iFoundEndNames)
+	{
+		cBuffer[iBufferIndex] = '\0';
+		memcpy(&asNodeNames[iCurrentNode*NODE_NAME_BUFFER_SIZE], &cBuffer[0], strlen(&cBuffer[0]) + 1 );
 	}
 	return asNodeNames;
 }
