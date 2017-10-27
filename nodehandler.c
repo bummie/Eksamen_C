@@ -43,15 +43,18 @@ int main(int argc, char **argv)
 		
 	// Init root mode
 	rootNode = newNode("root");
+	
 	//loadNodesFromFile(FILEPATH);
 	addNode(rootNode, newNode("seb"));
 	
-	NODE* nodeNameTest = findNodeByKey("seb"); 
+	//NODE* nodeNameTest = findNodeByKey("seb"); 
+	addNode(findNodeByKey("seb"), newNode("test"));
+	NODE* root = rootNode;
+	NODE* nodeNameTest = findNodeByKey("seb.test"); 
+
 	if(nodeNameTest != NULL)
 		printf("Node: %s", nodeNameTest->pszName);
-	
-	findNodeByKey("strings");
-	
+		
 	getchar();
 	return 0;
 }
@@ -103,6 +106,7 @@ NODE* findNodeByKey(char* nodeKey)
 	
 	for(int i = 0; i < iNodeCount; i++)
 	{
+		printf("NodeName: %s\n", &nodeNames[i * NODE_NAME_BUFFER_SIZE]);
 		node = tempNode->GetChildWithKey(tempNode, &nodeNames[i * NODE_NAME_BUFFER_SIZE]);
 		if(node == NULL) { break; };
 		
@@ -217,7 +221,7 @@ char* findNodeValue(char* pszNodeData)
 			if(!iFoundStartString && pszNodeData[i] == '"'){ iFoundStartString = 1; }
 			if(pszNodeData[i] != ' ' && !iFoundStartValue) { iFoundStartValue = 1; }
 				
-			if(iFoundStartValue && pszNodeData[i] != '"')
+			if(iFoundStartValue)// && pszNodeData[i] != '"')
 			{
 				cBuffer[iBufferIndex] = pszNodeData[i];
 				iBufferIndex++;
@@ -237,16 +241,15 @@ char* findNodeNames(char* pszNodeData, int iNodeCount)
 	char cBuffer[NODE_NAME_BUFFER_SIZE];
 	int iCurrentNode = 0;
 	int iBufferIndex = 0;
-	int iFoundEndNames = 0;
+	
 	for(int i = 0; i < strlen(pszNodeData); i++)
 	{
-		if(pszNodeData[i] == '.' || pszNodeData[i] == ' ')
+		if(pszNodeData[i] == '.' || pszNodeData[i] == ' ' || pszNodeData[i] == '=')
 		{
-			iFoundEndNames = 1;
 			cBuffer[iBufferIndex] = '\0';
 			memcpy(&asNodeNames[iCurrentNode*NODE_NAME_BUFFER_SIZE], &cBuffer[0], strlen(&cBuffer[0]) + 1 );
 
-			if(pszNodeData[i] == ' ')
+			if(pszNodeData[i] == ' ' || pszNodeData[i] == '=')
 				break;
 			
 			iBufferIndex = 0;
@@ -258,7 +261,7 @@ char* findNodeNames(char* pszNodeData, int iNodeCount)
 		}
 	}
 	
-	if(!iFoundEndNames)
+	if((iNodeCount - iCurrentNode) > 0 )
 	{
 		cBuffer[iBufferIndex] = '\0';
 		memcpy(&asNodeNames[iCurrentNode*NODE_NAME_BUFFER_SIZE], &cBuffer[0], strlen(&cBuffer[0]) + 1 );
@@ -268,6 +271,7 @@ char* findNodeNames(char* pszNodeData, int iNodeCount)
 
 int findNodeCountInString(char* pszNodeData)
 {
+	
 	int iNodeCount = 1;
 	for(int i = 0; i < strlen(pszNodeData); i++)
 	{
@@ -279,3 +283,5 @@ int findNodeCountInString(char* pszNodeData)
 		
 	return iNodeCount;
 }
+
+//TODO: Make a stripqoutes function
