@@ -43,17 +43,17 @@ int main(int argc, char **argv)
 		
 	// Init root mode
 	rootNode = newNode("root");
-	
-	//loadNodesFromFile(FILEPATH);
-	addNode(rootNode, newNode("seb"));
+	NODE* testNode = rootNode;
+	loadNodesFromFile(FILEPATH);
+	//addNode(rootNode, newNode("seb"));
 	
 	//NODE* nodeNameTest = findNodeByKey("seb"); 
-	addNode(findNodeByKey("seb"), newNode("test"));
-	NODE* root = rootNode;
-	NODE* nodeNameTest = findNodeByKey("seb.test"); 
+	//addNode(findNodeByKey("seb"), newNode("test"));
+	//NODE* root = rootNode;
+	//NODE* nodeNameTest = findNodeByKey("seb.test"); 
 
-	if(nodeNameTest != NULL)
-		printf("Node: %s", nodeNameTest->pszName);
+	//if(nodeNameTest != NULL)
+	//	printf("Node: %s", nodeNameTest->pszName);
 		
 	getchar();
 	return 0;
@@ -82,7 +82,8 @@ void destructNode(NODE* nNode)
 int addNode(NODE* nodeDestination, NODE* node)
 {
 	if(node == NULL) { return 0;};
-	
+	if(nodeDestination->GetChildWithKey(nodeDestination, node->pszName) != NULL){ printf("'%s' already exists!\n", node->pszName); return 0; }
+
 	if(nodeDestination->iNodes < nodeDestination->iArraySizeChildNodes)
 	{
 		nodeDestination->pnNodes[nodeDestination->iNodes] = node;
@@ -106,7 +107,6 @@ NODE* findNodeByKey(char* nodeKey)
 	
 	for(int i = 0; i < iNodeCount; i++)
 	{
-		printf("NodeName: %s\n", &nodeNames[i * NODE_NAME_BUFFER_SIZE]);
 		node = tempNode->GetChildWithKey(tempNode, &nodeNames[i * NODE_NAME_BUFFER_SIZE]);
 		if(node == NULL) { break; };
 		
@@ -182,9 +182,13 @@ int parseNodeData(char* pszNodeData)
 	int iNodeCount = findNodeCountInString(pszNodeData);
 	printf("NodeCount: %d\n", iNodeCount);
 	char* nodeNames = findNodeNames(pszNodeData, iNodeCount);
+	
+	NODE* tempNode = rootNode;
 	for(int i = 0; i < iNodeCount; i++)
 	{
 		printf("%s\n", &nodeNames[i*NODE_NAME_BUFFER_SIZE]);
+		printf("AddNodeState: %d\n", addNode(tempNode, newNode(&nodeNames[i*NODE_NAME_BUFFER_SIZE])));
+		tempNode = tempNode->GetChildWithKey(tempNode, &nodeNames[i*NODE_NAME_BUFFER_SIZE]);
 	}
 	char* nodeValue = findNodeValue(pszNodeData);
 	printf("Value: %s\n", nodeValue);
