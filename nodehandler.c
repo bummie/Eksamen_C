@@ -2,15 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define NODE_NAME_BUFFER_SIZE 256
 // Node structure
 typedef unsigned long ULONG;
 typedef struct _NODE 
 {
-	char* pszName; // Navnet på denne noden.
-	ULONG ulIntVal; // Hvis numerisk så er dette verdien.
-	char *pszString; // Peker til streng eller NULL hvis numerisk.
-	int iNodes; // Antall noder under denne. 0 for ingen.
-	struct _NODE *pnNodes[]; // Pekere til under-noder.
+	char* pszName; 
+	ULONG ulIntVal; 
+	char* pszString; 
+	int iNodes; 
+	int iSizeChildNodes;
+	struct _NODE* pnNodes[5];
+	
+	//Function pointers
+	struct _NODE* (*GetChildWithKey)(struct _NODE* self, char* key);
 } NODE;
 
 // Constants
@@ -23,20 +28,97 @@ int findNodeCountInString(char* pszNodeData);
 int parseNodeData(char* pszNodeData);
 char* findNodeNames(char* pszNodeData, int iNodeCount);
 char* findNodeValue(char* pszNodeData);
+NODE* newNode(char* pszName);
+NODE* findNodeByKey(char* nodeKey);
+
+// Pointer Functions
+NODE* NODE_GetChildWithKey(NODE* self, char* sKey);
+
+// Global variables
+NODE* rootNode;
 
 int main(int argc, char **argv)
 {
+		
+	// Init root mode
+	rootNode = newNode("root");
 	loadNodesFromFile(FILEPATH);
+	rootNode->pnNodes[0] = newNode("seb");
+	
+	NODE* nodeNameTest = findNodeByKey("seb"); 
+	if(nodeNameTest != NULL)
+		printf("Node: %s", nodeNameTest->pszName);
+	
+	findNodeByKey("strings");
+	
 	getchar();
 	return 0;
 }
 
+// Node
+NODE* newNode(char* pszName)
+{
+	NODE* node = malloc(sizeof(NODE));
+	node->pszName = pszName;
+	node->pszString = NULL;
+	node->ulIntVal = NULL;
+	node->iNodes = 0;
+	
+	node->GetChildWithKey = NODE_GetChildWithKey;
+	return node;
+}
+
+void destructNode(NODE* nNode)
+{
+	free(nNode);
+}
+
+NODE* findNodeByKey(char* nodeKey)
+{
+	NODE* node = NULL;
+	if(nodeKey == NULL || rootNode == NULL){ return node; }
+	
+	int iNodeCount = findNodeCountInString(nodeKey);
+	char* nodeNames = findNodeNames(nodeKey, iNodeCount);
+	NODE* tempNode = rootNode;
+	
+	for(int i = 0; i < iNodeCount; i++)
+	{
+		node = tempNode->GetChildWithKey(tempNode, &nodeNames[i * NODE_NAME_BUFFER_SIZE]);
+		if(node == NULL) { break; };
+		
+		tempNode = node;
+	}
+	
+	free(nodeNames);
+	return node;
+}
+
+// Function pointers
+NODE* NODE_GetChildWithKey(NODE* self, char* sKey)
+{
+	NODE* nodeChild = NULL;
+	
+	for(int i = 0; i < self->iNodes; i++)
+	{
+		NODE* tempNode = self->pnNodes[i];
+		if(strcasecmp(tempNode->pszName, sKey) == 0)
+		{
+			nodeChild = tempNode;
+			break;
+		}
+	}
+	
+	return nodeChild;
+}
+
+// Filehandling
 NODE* loadNodesFromFile(char* filePath)
 {
 	FILE* fFile = loadFile(filePath);
 	if(fFile == NULL){return NULL;}
 	
-	char* sBuffer = malloc(sizeof(char) * 1024);
+	char* sBuffer = malloc(1024);
 	size_t iLineLength;
 	char cReadStatus;
 	
@@ -44,6 +126,7 @@ NODE* loadNodesFromFile(char* filePath)
 	{
 		printf("Line: %s", sBuffer);
 		parseNodeData(sBuffer);
+		printf("\n");
 	}
 	
 	free(sBuffer);
@@ -69,23 +152,6 @@ FILE* loadFile(char* filePath)
 	return fFile;	
 }
 
-// TODO: node constructor
-NODE* NODE_New(char* pszName)
-{
-	NODE* node = malloc(sizeof(NODE));
-	node->pszName = pszName;
-	node->pszString = NULL;
-	node->ulIntVal = NULL;
-	node->iNodes = 0;
-	
-	return node;
-}
-
-void NODE_Destructor(NODE* nNode)
-{
-	free(nNode);
-}
-
 int parseNodeData(char* pszNodeData)
 {
 	if(pszNodeData == NULL)
@@ -96,9 +162,9 @@ int parseNodeData(char* pszNodeData)
 	char* nodeNames = findNodeNames(pszNodeData, iNodeCount);
 	for(int i = 0; i < iNodeCount; i++)
 	{
-		printf("%s\n", &nodeNames[i*256]);
+		printf("%s\n", &nodeNames[i*NODE_NAME_BUFFER_SIZE]);
 	}
-	char* nodeValue = findNodeValue(pszNodeData); //Atoi to determine wehter int or string
+	char* nodeValue = findNodeValue(pszNodeData);
 	printf("Value: %s\n", nodeValue);
 	
 	free(nodeNames);
@@ -109,8 +175,8 @@ int parseNodeData(char* pszNodeData)
 //TODO: Clean up
 char* findNodeValue(char* pszNodeData)
 {
-	char* sNodeValue = malloc(256);
-	char cBuffer[256];
+	char* sNodeValue = malloc(NODE_NAME_BUFFER_SIZE);
+	char cBuffer[NODE_NAME_BUFFER_SIZE];
 	int iBufferIndex = 0;
 	int iFoundCharEquals = 0;
 	int iFoundStartValue = 0;
@@ -127,6 +193,8 @@ char* findNodeValue(char* pszNodeData)
 		{
 			// End of stringvalue
 			if(iFoundStartString && pszNodeData[i] == '"'){ break; }
+			// End of numeric value
+			if(!iFoundStartString && iFoundStartValue && pszNodeData[i] == ' '){ break; }
 			
 			if(!iFoundStartString && pszNodeData[i] == '"'){ iFoundStartString = 1; }
 			if(pszNodeData[i] != ' ' && !iFoundStartValue) { iFoundStartValue = 1; }
@@ -147,8 +215,8 @@ char* findNodeValue(char* pszNodeData)
 //TODO: Clean up
 char* findNodeNames(char* pszNodeData, int iNodeCount)
 {
-	char* asNodeNames = malloc(iNodeCount * 256);
-	char cBuffer[256];
+	char* asNodeNames = malloc(iNodeCount * NODE_NAME_BUFFER_SIZE);
+	char cBuffer[NODE_NAME_BUFFER_SIZE];
 	int iCurrentNode = 0;
 	int iBufferIndex = 0;
 
@@ -157,7 +225,7 @@ char* findNodeNames(char* pszNodeData, int iNodeCount)
 		if(pszNodeData[i] == '.' || pszNodeData[i] == ' ')
 		{
 			cBuffer[iBufferIndex] = '\0';
-			memcpy(&asNodeNames[iCurrentNode*256], &cBuffer[0], strlen(&cBuffer[0]) + 1 );
+			memcpy(&asNodeNames[iCurrentNode*NODE_NAME_BUFFER_SIZE], &cBuffer[0], strlen(&cBuffer[0]) + 1 );
 			//asNodeNames[iCurrentNode] = &cBuffer[0];
 			if(pszNodeData[i] == ' ')
 				break;
