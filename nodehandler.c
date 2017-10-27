@@ -81,8 +81,13 @@ void destructNode(NODE* nNode)
 // Adds as a child of another node
 int addNode(NODE* nodeDestination, NODE* node)
 {
-	if(node == NULL) { return 0;};
-	if(nodeDestination->GetChildWithKey(nodeDestination, node->pszName) != NULL){ printf("'%s' already exists!\n", node->pszName); return 0; }
+	if(nodeDestination == NULL || node == NULL) { return 0;};
+	if(nodeDestination->GetChildWithKey(nodeDestination, node->pszName) != NULL)
+	{ 
+		printf("'%s' already exists!\n", node->pszName); 
+		destructNode(node);
+		return 0;
+	}
 
 	if(nodeDestination->iNodes < nodeDestination->iArraySizeChildNodes)
 	{
@@ -189,6 +194,10 @@ int parseNodeData(char* pszNodeData)
 		printf("%s\n", &nodeNames[i*NODE_NAME_BUFFER_SIZE]);
 		printf("AddNodeState: %d\n", addNode(tempNode, newNode(&nodeNames[i*NODE_NAME_BUFFER_SIZE])));
 		tempNode = tempNode->GetChildWithKey(tempNode, &nodeNames[i*NODE_NAME_BUFFER_SIZE]);
+		if(tempNode == NULL)
+			break;
+		printf("StringNameFromNode: %s\n", tempNode->pszName);
+
 	}
 	char* nodeValue = findNodeValue(pszNodeData);
 	printf("Value: %s\n", nodeValue);
