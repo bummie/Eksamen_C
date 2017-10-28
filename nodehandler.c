@@ -13,7 +13,7 @@ typedef struct _NODE
 	char* pszString; 
 	int iNodes; 
 	int iArraySizeChildNodes;
-	struct _NODE* pnNodes[NODE_CHILD_SIZE_INCREMENTER];
+	struct _NODE** pnNodes;
 	
 	//Function pointers
 	struct _NODE* (*GetChildWithKey)(struct _NODE* self, char* key);
@@ -72,7 +72,7 @@ NODE* newNode(char* pszName)
 	node->ulIntVal = NULL;
 	node->iNodes = 0;
 	node->iArraySizeChildNodes = NODE_CHILD_SIZE_INCREMENTER;
-
+	node->pnNodes = calloc(NODE_CHILD_SIZE_INCREMENTER, sizeof(NODE*));
 	node->GetChildWithKey = NODE_GetChildWithKey;
 	node->IncreaseChildArray = NODE_IncreaseChildArraySize;
 
@@ -81,6 +81,8 @@ NODE* newNode(char* pszName)
 
 void destructNode(NODE* nNode)
 {
+	free(nNode->pnNodes);
+	nNode->pnNodes = NULL;
 	free(nNode->pszName);
 	nNode->pszName = NULL;
 	free(nNode);
@@ -152,6 +154,17 @@ NODE* NODE_GetChildWithKey(NODE* self, char* sKey)
 void NODE_IncreaseChildArraySize(NODE* self)
 {
 	//TODO: Fikse increase størrelsen
+	if(self == NULL) { return; }
+	int iNewSize = (self->iArraySizeChildNodes + NODE_CHILD_SIZE_INCREMENTER);
+	NODE* nodeReallocated = realloc(self->pnNodes, iNewSize * sizeof(NODE*));
+	
+	if(nodeReallocated != NULL)
+	{
+		self->pnNodes = nodeReallocated;
+	}else
+	{
+		printf("Could not increase childrenArray");
+	}
 }
 
 // Filehandling
