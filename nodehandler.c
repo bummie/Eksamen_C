@@ -76,7 +76,10 @@ NODE* newNode(char* pszName)
 
 void destructNode(NODE* nNode)
 {
+	free(nNode->pszName);
+	nNode->pszName = NULL;
 	free(nNode);
+	nNode = NULL;
 }
 
 // Adds as a child of another node
