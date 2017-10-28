@@ -17,6 +17,8 @@ typedef struct _NODE
 	
 	//Function pointers
 	struct _NODE* (*GetChildWithKey)(struct _NODE* self, char* key);
+	void (*IncreaseChildArray)(struct _NODE* self);
+
 } NODE;
 
 // Constants
@@ -34,11 +36,12 @@ NODE* findNodeByKey(char* nodeKey);
 
 // Pointer Functions
 NODE* NODE_GetChildWithKey(NODE* self, char* sKey);
+void NODE_IncreaseChildArraySize(NODE* self);
 
 // Global variables
 NODE* rootNode;
 
-int main(int argc, char **argv)
+int main(void)
 {
 		
 	// Init root mode
@@ -71,6 +74,8 @@ NODE* newNode(char* pszName)
 	node->iArraySizeChildNodes = NODE_CHILD_SIZE_INCREMENTER;
 
 	node->GetChildWithKey = NODE_GetChildWithKey;
+	node->IncreaseChildArray = NODE_IncreaseChildArraySize;
+
 	return node;
 }
 
@@ -88,20 +93,18 @@ int addNode(NODE* nodeDestination, NODE* node)
 	if(nodeDestination == NULL || node == NULL) { return 0;};
 	if(nodeDestination->GetChildWithKey(nodeDestination, node->pszName) != NULL)
 	{ 
-		printf("'%s' already exists!\n", node->pszName); 
 		destructNode(node);
 		return 0;
 	}
 	
-	if(nodeDestination->iNodes < nodeDestination->iArraySizeChildNodes)
+	if(nodeDestination->iNodes >= nodeDestination->iArraySizeChildNodes)
 	{
-		nodeDestination->pnNodes[nodeDestination->iNodes] = node;
-		nodeDestination->iNodes++;
-	}else
-	{
-		//TODO: Increase nodearray and add
-		printf("'%s' is full\n", nodeDestination->pszName);
+		printf("'%s' is full, increasing size\n", nodeDestination->pszName);
+		nodeDestination->IncreaseChildArray(nodeDestination);
 	}
+		
+	nodeDestination->pnNodes[nodeDestination->iNodes] = node;
+	nodeDestination->iNodes++;
 	
 	return 1;
 }
@@ -143,6 +146,12 @@ NODE* NODE_GetChildWithKey(NODE* self, char* sKey)
 	}
 	
 	return nodeChild;
+}
+
+// Function pointers
+void NODE_IncreaseChildArraySize(NODE* self)
+{
+	//TODO: Fikse increase størrelsen
 }
 
 // Filehandling
