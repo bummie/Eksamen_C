@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 // Node
 NODE* newNode(char* pszName)
 {
-	NODE* node = malloc(sizeof(NODE));
+	NODE* node = calloc(1, sizeof(NODE));
 	node->pszName = pszName;
 	node->pszString = NULL;
 	node->ulIntVal = NULL;
@@ -88,7 +88,7 @@ int addNode(NODE* nodeDestination, NODE* node)
 		destructNode(node);
 		return 0;
 	}
-
+	
 	if(nodeDestination->iNodes < nodeDestination->iArraySizeChildNodes)
 	{
 		nodeDestination->pnNodes[nodeDestination->iNodes] = node;
@@ -96,6 +96,7 @@ int addNode(NODE* nodeDestination, NODE* node)
 	}else
 	{
 		//TODO: Increase nodearray and add
+		printf("'%s' is full\n", nodeDestination->pszName);
 	}
 	
 	return 1;
@@ -129,7 +130,7 @@ NODE* NODE_GetChildWithKey(NODE* self, char* sKey)
 	for(int i = 0; i < self->iNodes; i++)
 	{
 		NODE* tempNode = self->pnNodes[i];
-		if(strcasecmp(tempNode->pszName, sKey) == 0)
+		if(strcasecmp(tempNode->pszName, sKey) == 0)// TODO: Returnerer alltid TRUE Fikse her, 
 		{
 			nodeChild = tempNode;
 			break;
@@ -185,7 +186,7 @@ int parseNodeData(char* pszNodeData)
 		return 0;
 	
 	int iNodeCount = findNodeCountInString(pszNodeData);
-	printf("NodeCount: %d\n", iNodeCount);
+	//printf("NodeCount: %d\n", iNodeCount);
 	char* nodeNames = findNodeNames(pszNodeData, iNodeCount);
 	
 	NODE* tempNode = rootNode;
@@ -200,7 +201,7 @@ int parseNodeData(char* pszNodeData)
 
 	}
 	char* nodeValue = findNodeValue(pszNodeData);
-	printf("Value: %s\n", nodeValue);
+	//printf("Value: %s\n", nodeValue);
 	
 	free(nodeNames);
 	free(nodeValue);
