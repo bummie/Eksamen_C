@@ -4,8 +4,10 @@
 
 #define NODE_NAME_BUFFER_SIZE 256
 #define NODE_CHILD_SIZE_INCREMENTER 5
-#define TYPE_INT 0
+#define TYPE_NUMERIC 0
 #define TYPE_STRING 1
+#define TYPE_FOLDER 2
+
 // Node structure
 typedef unsigned long ULONG;
 typedef struct _NODE 
@@ -20,9 +22,12 @@ typedef struct _NODE
 	//Function pointers
 	struct _NODE* (*GetChildWithKey)(struct _NODE* self, char* key);
 	void (*IncreaseChildArray)(struct _NODE* self);
-	void (*SetInt)(struct _NODE* self, int iValue);
+	void (*SetInt)(struct _NODE* self, ULONG ulValue);
 	void (*SetString)(struct _NODE* self, char* pszText);
-
+	ULONG (*GetInt)(struct _NODE* self);
+	char* (*GetString)(struct _NODE* self);
+	int (*GetType)(struct _NODE* self);
+	
 } NODE;
 
 // Constants
@@ -41,8 +46,11 @@ NODE* findNodeByKey(char* nodeKey);
 // Pointer Functions
 NODE* NODE_GetChildWithKey(NODE* self, char* sKey);
 void NODE_IncreaseChildArraySize(NODE* self);
-void NODE_SetInt(NODE* self, int iValue);
+void NODE_SetInt(NODE* self, ULONG ulValue);
 void NODE_SetString(NODE* self, char* pszText);
+ULONG NODE_GetInt(NODE* self);
+char* NODE_GetString(NODE* self);
+int NODE_GetType(NODE* self);
 
 // Global variables
 NODE* rootNode;
@@ -86,6 +94,10 @@ NODE* newNode(char* pszName)
 	node->IncreaseChildArray = NODE_IncreaseChildArraySize;
 	node->SetInt = NODE_SetInt;
 	node->SetString = NODE_SetString;
+	node->GetInt = NODE_GetInt;
+	node->GetString = NODE_GetString;
+	node->GetType = NODE_GetType;
+	
 	return node;
 }
 
@@ -150,8 +162,7 @@ NODE* NODE_GetChildWithKey(NODE* self, char* sKey)
 	for(int i = 0; i < self->iNodes; i++)
 	{
 		NODE* tempNode = self->pnNodes[i];
-		printf("Compare: %s = %s\n",tempNode->pszName, sKey );
-		if(strcasecmp(tempNode->pszName, sKey) == 0)// TODO: Returnerer alltid TRUE Fikse her, 
+		if(strcasecmp(tempNode->pszName, sKey) == 0)// TODO: Binary search 
 		{
 			nodeChild = tempNode;
 			break;
@@ -178,11 +189,11 @@ void NODE_IncreaseChildArraySize(NODE* self)
 	}
 }
 
-void NODE_SetInt(NODE* self, int iValue)
+void NODE_SetInt(NODE* self, ULONG ulValue)
 {
 	//TODO: Fikse increase størrelsen
-	if(self == NULL || iValue == NULL) { return; }
-	self->ulIntVal = iValue;
+	if(self == NULL || ulValue == NULL) { return; }
+	self->ulIntVal = ulValue;
 	self->pszString = NULL;
 }
 
@@ -191,6 +202,36 @@ void NODE_SetString(NODE* self, char* pszText)
 	//TODO: Fikse increase størrelsen
 	if(self == NULL || pszText == NULL) { return; }
 	self->pszString = strdup(pszText);//self->pszString = pszText;
+}
+
+ULONG NODE_GetInt(NODE* self)
+{
+	if(self == NULL) { return NULL; }
+	return self->ulIntVal;
+}
+
+char* NODE_GetString(NODE* self)
+{
+	if(self == NULL) { return NULL; }
+	return self->pszString;
+}
+
+int NODE_GetType(NODE* self)
+{
+	if(self == NULL) { return NULL; }
+	
+	if(self->GetString(self) == NULL && self->GetInt(self) == NULL)
+	{
+		return TYPE_FOLDER;
+	}
+	else if(self->GetString == NULL)
+	{
+		return TYPE_NUMERIC;
+	}
+	else
+	{
+		return TYPE_STRING;
+	}
 }
 
 // Filehandling
@@ -258,11 +299,11 @@ int parseNodeData(char* pszNodeData)
 	if(tempNode != NULL)
 	{
 		char* sExtraChars;
-		long lIntegerValue = strtol(nodeValue, &sExtraChars, 10);
+		ULONG ulValue = strtol(nodeValue, &sExtraChars, 10);
 		
 		if(*sExtraChars == '\0' || *sExtraChars == '\n')
 		{
-			tempNode->SetInt(tempNode, lIntegerValue);
+			tempNode->SetInt(tempNode, ulValue);
 		}else
 		{
 			tempNode->SetString(tempNode, nodeValue);
