@@ -50,10 +50,10 @@ int main(int argc, char **argv)
 	//NODE* nodeNameTest = findNodeByKey("seb"); 
 	//addNode(findNodeByKey("seb"), newNode("test"));
 	//NODE* root = rootNode;
-	//NODE* nodeNameTest = findNodeByKey("seb.test"); 
+	NODE* nodeNameTest = findNodeByKey("config.loglevel"); 
 
-	//if(nodeNameTest != NULL)
-	//	printf("Node: %s", nodeNameTest->pszName);
+	if(nodeNameTest != NULL)
+		printf("Node: %s", nodeNameTest->pszName);
 		
 	getchar();
 	return 0;
