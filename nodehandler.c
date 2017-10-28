@@ -4,13 +4,15 @@
 
 #define NODE_NAME_BUFFER_SIZE 256
 #define NODE_CHILD_SIZE_INCREMENTER 5
+#define TYPE_INT 0
+#define TYPE_STRING 1
 // Node structure
 typedef unsigned long ULONG;
 typedef struct _NODE 
 {
 	char* pszName; 
 	ULONG ulIntVal; 
-	char* pszString; 
+	char* pszString;
 	int iNodes; 
 	int iArraySizeChildNodes;
 	struct _NODE** pnNodes;
@@ -18,6 +20,8 @@ typedef struct _NODE
 	//Function pointers
 	struct _NODE* (*GetChildWithKey)(struct _NODE* self, char* key);
 	void (*IncreaseChildArray)(struct _NODE* self);
+	void (*SetInt)(struct _NODE* self, int iValue);
+	void (*SetString)(struct _NODE* self, char* pszText);
 
 } NODE;
 
@@ -37,6 +41,8 @@ NODE* findNodeByKey(char* nodeKey);
 // Pointer Functions
 NODE* NODE_GetChildWithKey(NODE* self, char* sKey);
 void NODE_IncreaseChildArraySize(NODE* self);
+void NODE_SetInt(NODE* self, int iValue);
+void NODE_SetString(NODE* self, char* pszText);
 
 // Global variables
 NODE* rootNode;
@@ -73,9 +79,12 @@ NODE* newNode(char* pszName)
 	node->iNodes = 0;
 	node->iArraySizeChildNodes = NODE_CHILD_SIZE_INCREMENTER;
 	node->pnNodes = calloc(NODE_CHILD_SIZE_INCREMENTER, sizeof(NODE*));
+	
+	// Functions
 	node->GetChildWithKey = NODE_GetChildWithKey;
 	node->IncreaseChildArray = NODE_IncreaseChildArraySize;
-
+	node->SetInt = NODE_SetInt;
+	node->SetString = NODE_SetString;
 	return node;
 }
 
@@ -99,6 +108,7 @@ int addNode(NODE* nodeDestination, NODE* node)
 		return 0;
 	}
 	
+	// If nodes childrens array is full, increase
 	if(nodeDestination->iNodes >= nodeDestination->iArraySizeChildNodes)
 	{
 		printf("'%s' is full, increasing size\n", nodeDestination->pszName);
@@ -167,6 +177,21 @@ void NODE_IncreaseChildArraySize(NODE* self)
 	}
 }
 
+void NODE_SetInt(NODE* self, int iValue)
+{
+	//TODO: Fikse increase størrelsen
+	if(self == NULL || iValue == NULL) { return; }
+	self->ulIntVal = iValue;
+	self->pszString = NULL;
+}
+
+void NODE_SetString(NODE* self, char* pszText)
+{
+	//TODO: Fikse increase størrelsen
+	if(self == NULL || pszText == NULL) { return; }
+	self->pszString = strdup(pszText);//self->pszString = pszText;
+}
+
 // Filehandling
 NODE* loadNodesFromFile(char* filePath)
 {
@@ -179,7 +204,6 @@ NODE* loadNodesFromFile(char* filePath)
 	
 	while(cReadStatus = getline(&sBuffer, &iLineLength, fFile) != -1)
 	{
-		//printf("Line: %s\n", sBuffer);
 		parseNodeData(sBuffer);
 		printf("\n");
 	}
@@ -228,9 +252,24 @@ int parseNodeData(char* pszNodeData)
 		printf("StringNameFromNode: %s\n", tempNode->pszName);
 
 	}
+	
+	// Set value of node
 	char* nodeValue = findNodeValue(pszNodeData);
+	if(tempNode != NULL)
+	{
+		char* sExtraChars;
+		long lIntegerValue = strtol(nodeValue, sExtraChars, 10);
+		if(!*sExtraChars)
+		{
+			tempNode->SetInt(tempNode, lIntegerValue);
+		}else
+		{
+			tempNode->SetString(tempNode, nodeValue);
+		}
+	}
 	//printf("Value: %s\n", nodeValue);
 	
+	// Fre memory
 	free(nodeNames);
 	nodeNames = NULL;
 	free(nodeValue);
