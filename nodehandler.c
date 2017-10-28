@@ -59,10 +59,11 @@ int main(void)
 	//NODE* nodeNameTest = findNodeByKey("seb"); 
 	//addNode(findNodeByKey("seb"), newNode("test"));
 	//NODE* root = rootNode;
-	NODE* nodeNameTest = findNodeByKey("config.loglevel"); 
+	//NODE* nodeNameTest = findNodeByKey("strings.no.header"); 
+	NODE* nodeNameTest = findNodeByKey("config.update.interval"); 
 
 	if(nodeNameTest != NULL)
-		printf("Node: %s", nodeNameTest->pszName);
+		printf("Node: %s, Value: %s", nodeNameTest->pszName, nodeNameTest->pszString);
 		
 	getchar();
 	return 0;
@@ -258,7 +259,8 @@ int parseNodeData(char* pszNodeData)
 	{
 		char* sExtraChars;
 		long lIntegerValue = strtol(nodeValue, &sExtraChars, 10);
-		if(!*sExtraChars)
+		
+		if(*sExtraChars == '\0' || *sExtraChars == '\n')
 		{
 			tempNode->SetInt(tempNode, lIntegerValue);
 		}else
@@ -296,7 +298,12 @@ char* findNodeValue(char* pszNodeData)
 		if(iFoundCharEquals)
 		{
 			// End of stringvalue
-			if(iFoundStartString && pszNodeData[i] == '"'){ break; }
+			if(iFoundStartString && pszNodeData[i] == '"')
+			{ 
+				cBuffer[iBufferIndex] = '"';
+				iBufferIndex++;
+				break;
+			}
 			// End of numeric value
 			if(!iFoundStartString && iFoundStartValue && pszNodeData[i] == ' '){ break; }
 			
