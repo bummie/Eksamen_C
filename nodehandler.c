@@ -63,7 +63,8 @@ int main(int argc, char **argv)
 NODE* newNode(char* pszName)
 {
 	NODE* node = calloc(1, sizeof(NODE));
-	node->pszName = pszName;
+	node->pszName = malloc(strlen(pszName) + 1);
+	memcpy(node->pszName, pszName, strlen(pszName) + 1);
 	node->pszString = NULL;
 	node->ulIntVal = NULL;
 	node->iNodes = 0;
@@ -130,6 +131,7 @@ NODE* NODE_GetChildWithKey(NODE* self, char* sKey)
 	for(int i = 0; i < self->iNodes; i++)
 	{
 		NODE* tempNode = self->pnNodes[i];
+		printf("Compare: %s = %s\n",tempNode->pszName, sKey );
 		if(strcasecmp(tempNode->pszName, sKey) == 0)// TODO: Returnerer alltid TRUE Fikse her, 
 		{
 			nodeChild = tempNode;
@@ -152,12 +154,13 @@ NODE* loadNodesFromFile(char* filePath)
 	
 	while(cReadStatus = getline(&sBuffer, &iLineLength, fFile) != -1)
 	{
-		printf("Line: %s", sBuffer);
+		//printf("Line: %s\n", sBuffer);
 		parseNodeData(sBuffer);
 		printf("\n");
 	}
 	
 	free(sBuffer);
+	sBuffer = NULL;
 	fclose(fFile);
 }
 
@@ -195,8 +198,8 @@ int parseNodeData(char* pszNodeData)
 		printf("%s\n", &nodeNames[i*NODE_NAME_BUFFER_SIZE]);
 		printf("AddNodeState: %d\n", addNode(tempNode, newNode(&nodeNames[i*NODE_NAME_BUFFER_SIZE])));
 		tempNode = tempNode->GetChildWithKey(tempNode, &nodeNames[i*NODE_NAME_BUFFER_SIZE]);
-		if(tempNode == NULL)
-			break;
+		if(tempNode == NULL) { break; }
+		
 		printf("StringNameFromNode: %s\n", tempNode->pszName);
 
 	}
@@ -204,7 +207,9 @@ int parseNodeData(char* pszNodeData)
 	//printf("Value: %s\n", nodeValue);
 	
 	free(nodeNames);
+	nodeNames = NULL;
 	free(nodeValue);
+	nodeValue = NULL;
 	return 1;
 }
 
