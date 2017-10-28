@@ -250,7 +250,6 @@ int parseNodeData(char* pszNodeData)
 		if(tempNode == NULL) { break; }
 		
 		printf("StringNameFromNode: %s\n", tempNode->pszName);
-
 	}
 	
 	// Set value of node
@@ -258,7 +257,7 @@ int parseNodeData(char* pszNodeData)
 	if(tempNode != NULL)
 	{
 		char* sExtraChars;
-		long lIntegerValue = strtol(nodeValue, sExtraChars, 10);
+		long lIntegerValue = strtol(nodeValue, &sExtraChars, 10);
 		if(!*sExtraChars)
 		{
 			tempNode->SetInt(tempNode, lIntegerValue);
