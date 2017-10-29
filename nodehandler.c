@@ -4,6 +4,8 @@
 
 #define NODE_NAME_BUFFER_SIZE 256
 #define NODE_CHILD_SIZE_INCREMENTER 5
+
+// Node types
 #define TYPE_NUMERIC 0
 #define TYPE_STRING 1
 #define TYPE_FOLDER 2
@@ -27,6 +29,7 @@ typedef struct _NODE
 	ULONG (*GetInt)(struct _NODE* self);
 	char* (*GetString)(struct _NODE* self);
 	int (*GetType)(struct _NODE* self);
+	void (*Print)(struct _NODE* self);
 	
 } NODE;
 
@@ -51,6 +54,8 @@ void NODE_SetString(NODE* self, char* pszText);
 ULONG NODE_GetInt(NODE* self);
 char* NODE_GetString(NODE* self);
 int NODE_GetType(NODE* self);
+void NODE_Print(NODE* self);
+
 
 // Global variables
 NODE* rootNode;
@@ -68,10 +73,8 @@ int main(void)
 	//addNode(findNodeByKey("seb"), newNode("test"));
 	//NODE* root = rootNode;
 	//NODE* nodeNameTest = findNodeByKey("strings.no.header"); 
-	NODE* nodeNameTest = findNodeByKey("config.update.interval"); 
-
-	if(nodeNameTest != NULL)
-		printf("Node: %s, Value: %s", nodeNameTest->pszName, nodeNameTest->pszString);
+	NODE* nodeNameTest = findNodeByKey("config.update.server1"); 
+	nodeNameTest->Print(nodeNameTest);
 		
 	getchar();
 	return 0;
@@ -97,6 +100,7 @@ NODE* newNode(char* pszName)
 	node->GetInt = NODE_GetInt;
 	node->GetString = NODE_GetString;
 	node->GetType = NODE_GetType;
+	node->Print = NODE_Print;
 	
 	return node;
 }
@@ -224,13 +228,31 @@ int NODE_GetType(NODE* self)
 	{
 		return TYPE_FOLDER;
 	}
-	else if(self->GetString == NULL)
+	else if(self->GetString(self) == NULL)
 	{
 		return TYPE_NUMERIC;
 	}
 	else
 	{
 		return TYPE_STRING;
+	}
+}
+
+void NODE_Print(NODE* self)
+{
+	if(self == NULL) { printf("Print failed: Node is null\n"); return NULL; }
+	
+	if(self->GetType(self) == TYPE_FOLDER)
+	{
+		printf("[%s]: Type: Folder, Children: %d\n", self->pszName, self->iNodes);
+	}
+	else if(self->GetType(self) == TYPE_NUMERIC)
+	{
+		printf("[%s]: Type: Numeric, Children: %d, Value: %d\n", self->pszName, self->iNodes, self->ulIntVal);
+	}
+	else if(self->GetType(self) == TYPE_STRING)
+	{
+		printf("[%s]: Type: Text, Children: %d, Value: %s\n", self->pszName, self->iNodes, self->pszString);
 	}
 }
 
