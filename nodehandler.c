@@ -138,6 +138,12 @@ int addNode(NODE* nodeDestination, NODE* node)
 	return 1;
 }
 
+void Enumerate(char* nodeKey, void (*Callback)(char* nodeName)(char* nodeValue))
+{
+	if(nodeKey == NULL || Callback == NULL) { return; }
+	//TODO: Gjøre ferdig enumerator
+}
+
 NODE* findNodeByKey(char* nodeKey)
 {
 	NODE* node = NULL;
