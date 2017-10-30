@@ -227,7 +227,7 @@ void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, void* nodeValue))
 		NODE* parentNode = findNodeByKey(nodeKey);
 		if(parentNode != NULL)
 		{
-			Callback(parentNode->pszName, parentNode->GetString(parentNode));
+			Callback(nodeKey, parentNode->GetValue(parentNode));
 		}
 	}
 }
@@ -240,11 +240,11 @@ void callbackPrint(char* nodeName, void* nodeValue)
 
 	if(callbackNode->GetType(callbackNode) == TYPE_NUMERIC)
 	{
-		printf("Node: %s, Value: %d\n", nodeName, nodeValue);
+		printf("Callback_Node: %s, Value: %d\n", nodeName, nodeValue);
 	}
 	else if(callbackNode->GetType(callbackNode) == TYPE_STRING)
 	{
-		printf("Node: %s, Value: %s\n", nodeName, nodeValue);
+		printf("Callback_Node: %s, Value: %s\n", nodeName, nodeValue);
 	}
 }
 
