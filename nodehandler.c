@@ -3,29 +3,9 @@
 // Global variables
 NODE* rootNode;
 
-int main(void)
+void init()
 {
-	// Init root mode
 	rootNode = newNode("root");
-	NODE* testNode = rootNode;
-	loadNodesFromFile(FILEPATH);
-	//addNode(rootNode, newNode("seb"));
-	
-	//NODE* nodeNameTest = findNodeByKey("seb"); 
-	//addNode(findNodeByKey("seb"), newNode("test"));
-	//NODE* root = rootNode;
-	//NODE* nodeNameTest = findNodeByKey("strings.no.header"); 
-	NODE* nodeNameTest = findNodeByKey("config.update.server1"); 
-	nodeNameTest->Print(nodeNameTest);
-	nodeNameTest->SetValue(nodeNameTest, TYPE_STRING, "Hello");
-	nodeNameTest->Print(nodeNameTest);
-	Enumerate("config.update.*", callbackPrint);
-	Enumerate("strings.no.header", callbackPrint);
-	
-	Delete("config.update");
-		
-	getchar();
-	return 0;
 }
 
 // Node
@@ -150,7 +130,7 @@ void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, void* nodeValue))
 				if(childNode->GetType(childNode) != TYPE_FOLDER)
 				{
 					// Creates nodekey for child
-					snprintf(nodeChildKey, sizeof(nodeChildKey), "%s.%s", pszKeyDuplicate, childNode->pszName);
+					snprintf(nodeChildKey, (sizeof(nodeChildKey)-1), "%s.%s", pszKeyDuplicate, childNode->pszName);
 					//childNode->Print(childNode);
 					Callback(nodeChildKey, childNode->GetValue(childNode));
 				}
