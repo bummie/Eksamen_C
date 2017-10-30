@@ -512,4 +512,35 @@ int findNodeCountInString(char* pszNodeData)
 	return iNodeCount;
 }
 
+void sortNodeChildren(NODE* nodeParent)
+{
+	if(nodeParent == NULL) { return; }
+	
+	int iSortedIndex = 0;
+	int iSelectedIndex = 0;
+	
+	while(nodeParent->iNodes > iSortedIndex)
+	{
+		iSelectedIndex = iSortedIndex;
+		for(int i = iSortedIndex; i < nodeParent->iNodes; i++)
+		{
+			if(strcasecmp(nodeParent->pnNodes[i]->pszName, nodeParent->pnNodes[iSelectedIndex]->pszName) > 0)
+			{
+				iSelectedIndex = i;
+			}
+				
+		}
+		
+		printf("Swap: %s med %s\n", nodeParent->pnNodes[iSortedIndex]->pszName, nodeParent->pnNodes[iSelectedIndex]->pszName);
+		swap(nodeParent->pnNodes[iSortedIndex], nodeParent->pnNodes[iSelectedIndex]);
+		iSortedIndex++;
+	}
+}
+
+void swap(NODE* a, NODE* b)
+{
+	NODE* swap = a;
+	a = b;
+	b = swap;
+}
 //TODO: Make a stripqoutes function

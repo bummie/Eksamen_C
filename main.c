@@ -8,8 +8,11 @@ int main(void)
 	
 	NODE* nodeNameTest = findNodeByKey("config.update.server1"); 
 	nodeNameTest->Print(nodeNameTest);
-	nodeNameTest->SetValue(nodeNameTest, TYPE_STRING, "Hello");
+	ULONG testVal = 120;
+	nodeNameTest->SetValue(nodeNameTest, TYPE_NUMERIC, &testVal);
 	nodeNameTest->Print(nodeNameTest);
+	Enumerate("config.update.*", callbackPrint);
+	sortNodeChildren(findNodeByKey("config.update"));
 	Enumerate("config.update.*", callbackPrint);
 	Enumerate("strings.no.header", callbackPrint);
 	

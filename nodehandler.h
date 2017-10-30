@@ -8,6 +8,8 @@
 #define NODE_NAME_BUFFER_SIZE 256
 #define NODE_CHILD_SIZE_INCREMENTER 5
 #define FILEPATH "../Data/data.txt"
+#define FALSE 0
+#define TRUE !FALSE
 
 // Node types
 #define TYPE_NUMERIC 0
@@ -53,6 +55,8 @@ void callbackPrint(char* nodeName, void* nodeValue);
 void Delete(char* nodeKey);
 void DeleteByNode(NODE* nodeDelete);
 char* GetText(char* nodeName, char* nodeLangCode);
+void sortNodeChildren(NODE* nodeParent);
+void swap(NODE* a, NODE* b);
 
 // Pointer Functions
 NODE* NODE_GetChildWithKey(NODE* self, char* sKey);
