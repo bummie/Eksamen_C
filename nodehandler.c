@@ -47,8 +47,8 @@ char* findNodeNames(char* pszNodeData, int iNodeCount);
 char* findNodeValue(char* pszNodeData);
 NODE* newNode(char* pszName);
 NODE* findNodeByKey(char* nodeKey);
-void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, char* nodeValue));
-void callbackPrint(char* nodeName, char* nodeValue);
+void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, void* nodeValue));
+void callbackPrint(char* nodeName, void* nodeValue);
 void Delete(char* nodeKey);
 void DeleteByNode(NODE* nodeDelete);
 
@@ -84,7 +84,7 @@ int main(void)
 	nodeNameTest->SetValue(nodeNameTest, TYPE_STRING, "Hello");
 	nodeNameTest->Print(nodeNameTest);
 	Enumerate("config.update.*", callbackPrint);
-	Enumerate("config.update", NULL);
+	Enumerate("strings.no.header", callbackPrint);
 	
 	Delete("config.update");
 		
@@ -192,7 +192,7 @@ void DeleteByNode(NODE* nodeDelete)
 	destructNode(nodeDelete);
 }
 
-void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, char* nodeValue))
+void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, void* nodeValue))
 {
 	if(nodeKey == NULL || Callback == NULL) { return; }
 	
@@ -215,7 +215,7 @@ void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, char* nodeValue))
 					// Creates nodekey for child
 					snprintf(nodeChildKey, sizeof(nodeChildKey), "%s.%s", pszKeyDuplicate, childNode->pszName);
 					//childNode->Print(childNode);
-					Callback(nodeChildKey, childNode->GetString(childNode));
+					Callback(nodeChildKey, childNode->GetValue(childNode));
 				}
 			}
 		}
@@ -232,9 +232,20 @@ void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, char* nodeValue))
 	}
 }
 
-void callbackPrint(char* nodeName, char* nodeValue)
+void callbackPrint(char* nodeName, void* nodeValue)
 {
-	printf("Node: %s, Value: %s\n", nodeName, nodeValue);
+	if(nodeName == NULL || nodeValue == NULL) { return; }
+	NODE* callbackNode = findNodeByKey(nodeName);
+	if(callbackNode == NULL) { return; }
+
+	if(callbackNode->GetType(callbackNode) == TYPE_NUMERIC)
+	{
+		printf("Node: %s, Value: %d\n", nodeName, nodeValue);
+	}
+	else if(callbackNode->GetType(callbackNode) == TYPE_STRING)
+	{
+		printf("Node: %s, Value: %s\n", nodeName, nodeValue);
+	}
 }
 
 NODE* findNodeByKey(char* nodeKey)
@@ -325,7 +336,7 @@ void* NODE_GetValue(NODE* self)
 	
 	if(self->GetType(self) == TYPE_NUMERIC)
 	{
-		return (void*) (self->GetInt(self));
+		return (void*) ((int*)(self->GetInt(self)));
 	}
 	else if(self->GetType(self) == TYPE_STRING)
 	{
