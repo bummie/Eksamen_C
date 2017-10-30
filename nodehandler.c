@@ -30,6 +30,8 @@ typedef struct _NODE
 	char* (*GetString)(struct _NODE* self);
 	int (*GetType)(struct _NODE* self);
 	void (*Print)(struct _NODE* self);
+	void* (*GetValue)(struct _NODE* self);
+	void (*SetValue)(struct _NODE* self, int iValueType, void* nodeValue);
 	
 } NODE;
 
@@ -59,6 +61,8 @@ ULONG NODE_GetInt(NODE* self);
 char* NODE_GetString(NODE* self);
 int NODE_GetType(NODE* self);
 void NODE_Print(NODE* self);
+void* NODE_GetValue(NODE* self);
+void NODE_SetValue(NODE* self, int iValueType, void* nodeValue);
 
 // Global variables
 NODE* rootNode;
@@ -76,6 +80,8 @@ int main(void)
 	//NODE* root = rootNode;
 	//NODE* nodeNameTest = findNodeByKey("strings.no.header"); 
 	NODE* nodeNameTest = findNodeByKey("config.update.server1"); 
+	nodeNameTest->Print(nodeNameTest);
+	nodeNameTest->SetValue(nodeNameTest, TYPE_STRING, "Hello");
 	nodeNameTest->Print(nodeNameTest);
 	Enumerate("config.update.*", callbackPrint);
 	Enumerate("config.update", NULL);
@@ -107,6 +113,8 @@ NODE* newNode(char* pszName)
 	node->GetString = NODE_GetString;
 	node->GetType = NODE_GetType;
 	node->Print = NODE_Print;
+	node->SetValue = NODE_SetValue;
+	node->GetValue = NODE_GetValue;
 	
 	return node;
 }
@@ -163,6 +171,7 @@ void Delete(char* nodeKey)
 	destructNode(nodeDelete);
 	
 	//TODO: Oppdatere forelder om at barnet er dødt
+	//TODO: Sortere barnene til forelder, så ingen hull
 	//TODO: Decrase size om antallerer mindre
 }
 
@@ -191,9 +200,9 @@ void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, char* nodeValue))
 	if(nodeKey[strlen(nodeKey) - 1] == '*')
 	{
 		char* pszKeyDuplicate = strdup(nodeKey);
+		char nodeChildKey[NODE_NAME_BUFFER_SIZE];
 		pszKeyDuplicate[strlen(pszKeyDuplicate) - 2] = '\0';
 		
-		printf("String: %s\n", pszKeyDuplicate);
 		NODE* parentNode = findNodeByKey(pszKeyDuplicate);
 		
 		if(parentNode != NULL)
@@ -203,17 +212,18 @@ void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, char* nodeValue))
 				NODE* childNode = parentNode->pnNodes[i];
 				if(childNode->GetType(childNode) != TYPE_FOLDER)
 				{
-					childNode->Print(childNode);
-					Callback(childNode->pszName, childNode->GetString(childNode));
+					// Creates nodekey for child
+					snprintf(nodeChildKey, sizeof(nodeChildKey), "%s.%s", pszKeyDuplicate, childNode->pszName);
+					//childNode->Print(childNode);
+					Callback(nodeChildKey, childNode->GetString(childNode));
 				}
 			}
 		}
-		
 		free(pszKeyDuplicate);
 	}
 	else
 	{
-		// Did not find start
+		// Did not find star *
 		NODE* parentNode = findNodeByKey(nodeKey);
 		if(parentNode != NULL)
 		{
@@ -309,6 +319,36 @@ char* NODE_GetString(NODE* self)
 	return self->pszString;
 }
 
+void* NODE_GetValue(NODE* self)
+{
+	if(self == NULL) { return NULL; }
+	
+	if(self->GetType(self) == TYPE_NUMERIC)
+	{
+		return (void*) (self->GetInt(self));
+	}
+	else if(self->GetType(self) == TYPE_STRING)
+	{
+		return (void*) self->GetString(self);
+	}
+	
+	return NULL;
+}
+
+void NODE_SetValue(NODE* self, int iValueType, void* nodeValue)
+{
+	if(self == NULL) { return NULL; }
+	
+	if(iValueType == TYPE_NUMERIC)
+	{
+		self->SetInt(self, *((int*) nodeValue));
+	}
+	else if(iValueType == TYPE_STRING)
+	{
+		self->SetString(self, (char*) nodeValue);
+	}
+}
+
 int NODE_GetType(NODE* self)
 {
 	if(self == NULL) { return NULL; }
@@ -337,11 +377,11 @@ void NODE_Print(NODE* self)
 	}
 	else if(self->GetType(self) == TYPE_NUMERIC)
 	{
-		printf("[%s]: Type: Numeric, Children: %d, Value: %d\n", self->pszName, self->iNodes, self->ulIntVal);
+		printf("[%s]: Type: Numeric, Children: %d, Value: %d\n", self->pszName, self->iNodes, self->GetInt(self));
 	}
 	else if(self->GetType(self) == TYPE_STRING)
 	{
-		printf("[%s]: Type: Text, Children: %d, Value: %s\n", self->pszName, self->iNodes, self->pszString);
+		printf("[%s]: Type: Text, Children: %d, Value: %s\n", self->pszName, self->iNodes, self->GetString(self));
 	}
 }
 
