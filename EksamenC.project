@@ -95,5 +95,6 @@
   <VirtualDirectory Name="src">
     <File Name="main.c"/>
     <File Name="nodehandler.c"/>
+    <File Name="nodehandler.h"/>
   </VirtualDirectory>
 </CodeLite_Project>
