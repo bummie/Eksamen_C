@@ -45,6 +45,10 @@ char* findNodeNames(char* pszNodeData, int iNodeCount);
 char* findNodeValue(char* pszNodeData);
 NODE* newNode(char* pszName);
 NODE* findNodeByKey(char* nodeKey);
+void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, char* nodeValue));
+void callbackPrint(char* nodeName, char* nodeValue);
+void Delete(char* nodeKey);
+void DeleteByNode(NODE* nodeDelete);
 
 // Pointer Functions
 NODE* NODE_GetChildWithKey(NODE* self, char* sKey);
@@ -56,13 +60,11 @@ char* NODE_GetString(NODE* self);
 int NODE_GetType(NODE* self);
 void NODE_Print(NODE* self);
 
-
 // Global variables
 NODE* rootNode;
 
 int main(void)
 {
-		
 	// Init root mode
 	rootNode = newNode("root");
 	NODE* testNode = rootNode;
@@ -75,6 +77,10 @@ int main(void)
 	//NODE* nodeNameTest = findNodeByKey("strings.no.header"); 
 	NODE* nodeNameTest = findNodeByKey("config.update.server1"); 
 	nodeNameTest->Print(nodeNameTest);
+	Enumerate("config.update.*", callbackPrint);
+	Enumerate("config.update", NULL);
+	
+	Delete("config.update");
 		
 	getchar();
 	return 0;
@@ -138,10 +144,87 @@ int addNode(NODE* nodeDestination, NODE* node)
 	return 1;
 }
 
-void Enumerate(char* nodeKey, void (*Callback)(char* nodeName)(char* nodeValue))
+void Delete(char* nodeKey)
+{
+	if(nodeKey == NULL) { return; };
+	
+	NODE* nodeDelete = findNodeByKey(nodeKey);
+	if(nodeDelete == NULL) { return; }
+	
+	// Delete babies first
+	if(nodeDelete->iNodes > 0)
+	{
+		for(int i = 0; i < nodeDelete->iNodes; i++)
+		{
+			DeleteByNode(nodeDelete->pnNodes[i]);
+		}
+	}
+	printf("Sletter_NODE: %s\n", nodeDelete->pszName);
+	destructNode(nodeDelete);
+	
+	//TODO: Oppdatere forelder om at barnet er dødt
+	//TODO: Decrase size om antallerer mindre
+}
+
+void DeleteByNode(NODE* nodeDelete)
+{
+	if(nodeDelete == NULL) { return; };
+
+	// Delete babies first
+	if(nodeDelete->iNodes > 0)
+	{
+		for(int i = 0; i < nodeDelete->iNodes; i++)
+		{
+			Delete(nodeDelete->pnNodes[i]);
+		}
+	}
+	
+	printf("Sletter_barn: %s\n", nodeDelete->pszName);
+	destructNode(nodeDelete);
+}
+
+void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, char* nodeValue))
 {
 	if(nodeKey == NULL || Callback == NULL) { return; }
-	//TODO: Gjøre ferdig enumerator
+	
+	// If user inputted a star at the end
+	if(nodeKey[strlen(nodeKey) - 1] == '*')
+	{
+		char* pszKeyDuplicate = strdup(nodeKey);
+		pszKeyDuplicate[strlen(pszKeyDuplicate) - 2] = '\0';
+		
+		printf("String: %s\n", pszKeyDuplicate);
+		NODE* parentNode = findNodeByKey(pszKeyDuplicate);
+		
+		if(parentNode != NULL)
+		{
+			for(int i = 0; i < parentNode->iNodes; i++)
+			{
+				NODE* childNode = parentNode->pnNodes[i];
+				if(childNode->GetType(childNode) != TYPE_FOLDER)
+				{
+					childNode->Print(childNode);
+					Callback(childNode->pszName, childNode->GetString(childNode));
+				}
+			}
+		}
+		
+		free(pszKeyDuplicate);
+	}
+	else
+	{
+		// Did not find start
+		NODE* parentNode = findNodeByKey(nodeKey);
+		if(parentNode != NULL)
+		{
+			Callback(parentNode->pszName, parentNode->GetString(parentNode));
+		}
+	}
+}
+
+void callbackPrint(char* nodeName, char* nodeValue)
+{
+	printf("Node: %s, Value: %s\n", nodeName, nodeValue);
 }
 
 NODE* findNodeByKey(char* nodeKey)
