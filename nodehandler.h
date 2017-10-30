@@ -52,6 +52,7 @@ void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, void* nodeValue))
 void callbackPrint(char* nodeName, void* nodeValue);
 void Delete(char* nodeKey);
 void DeleteByNode(NODE* nodeDelete);
+char* GetText(char* nodeName, char* nodeLangCode);
 
 // Pointer Functions
 NODE* NODE_GetChildWithKey(NODE* self, char* sKey);

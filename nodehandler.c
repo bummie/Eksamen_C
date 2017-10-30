@@ -108,6 +108,25 @@ void DeleteByNode(NODE* nodeDelete)
 	destructNode(nodeDelete);
 }
 
+char* GetText(char* nodeName, char* nodeLangCode)
+{
+	if(nodeName == NULL || nodeLangCode == NULL) { return; }
+	
+	char nodeKey[512];
+	snprintf(nodeKey, (sizeof(nodeKey)-1), "%s.%s.%s", "strings", nodeLangCode, nodeName);
+	
+	NODE* nodeLang = findNodeByKey(nodeKey);
+	if(nodeLang == NULL)
+	{
+		// Try english version
+		if(strcasecmp("en", nodeLangCode) == 0) { return NULL; }
+		
+		snprintf(nodeKey, (sizeof(nodeKey)-1), "%s.%s.%s", "strings", "en", nodeName);
+		nodeLang = findNodeByKey(nodeKey);
+	}
+	return nodeLang->GetValue(nodeLang);
+}
+
 // Takes inputkey "strings.no.*" and calls function pointer with nodekey and value
 void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, void* nodeValue))
 {

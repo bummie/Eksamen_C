@@ -13,6 +13,8 @@ int main(void)
 	Enumerate("config.update.*", callbackPrint);
 	Enumerate("strings.no.header", callbackPrint);
 	
+	printf("Button_cancel: %s\n", GetText("button_ok", "no"));
+	
 	Delete("config.update");
 		
 	getchar();
