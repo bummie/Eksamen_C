@@ -12,8 +12,6 @@ int main(void)
 	nodeNameTest->SetValue(nodeNameTest, TYPE_NUMERIC, &testVal);
 	nodeNameTest->Print(nodeNameTest);
 	Enumerate("config.update.*", callbackPrint);
-	sortNodeChildren(findNodeByKey("config.update"));
-	Enumerate("config.update.*", callbackPrint);
 	Enumerate("strings.no.header", callbackPrint);
 	
 	printf("Button_cancel: %s\n", GetText("button_ok", "no"));

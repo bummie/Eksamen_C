@@ -10,6 +10,8 @@
 #define FILEPATH "../Data/data.txt"
 #define FALSE 0
 #define TRUE !FALSE
+#define LEFT 0
+#define RIGHT !LEFT
 
 // Node types
 #define TYPE_NUMERIC 0
@@ -57,6 +59,8 @@ void DeleteByNode(NODE* nodeDelete);
 char* GetText(char* nodeName, char* nodeLangCode);
 void sortNodeChildren(NODE* nodeParent);
 void swap(NODE* a, NODE* b);
+void shiftArray(int iDirection, NODE* nodeParent, int iIndex);
+void addNodeSortedPosition(NODE* nodeParent, NODE* newNode);
 
 // Pointer Functions
 NODE* NODE_GetChildWithKey(NODE* self, char* sKey);

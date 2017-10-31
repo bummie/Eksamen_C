@@ -61,10 +61,26 @@ int addNode(NODE* nodeDestination, NODE* node)
 		printf("'%s' is full, increasing size\n", nodeDestination->pszName);
 		nodeDestination->IncreaseChildArray(nodeDestination);
 	}
-		
-	nodeDestination->pnNodes[nodeDestination->iNodes] = node;
+	
+	
+	addNodeSortedPosition(nodeDestination, node);
+	//nodeDestination->pnNodes[nodeDestination->iNodes] = node;
 	nodeDestination->iNodes++;
 	
+	printf("Array_START: %s\n", nodeDestination->pszName);
+	for(int i = 0; i < nodeDestination->iNodes; i++)
+	{
+		if(nodeDestination->pnNodes[i] != NULL)
+		{
+			printf("I: %d: ", i);
+			nodeDestination->pnNodes[i]->Print(nodeDestination->pnNodes[i]);
+		}
+		else
+			printf("NULL\n");
+	}
+	printf("Array_END\n\n");
+	
+		
 	return 1;
 }
 
@@ -251,7 +267,9 @@ void NODE_SetString(NODE* self, char* pszText)
 {
 	//TODO: Fikse increase størrelsen
 	if(self == NULL || pszText == NULL) { return; }
-	self->pszString = strdup(pszText);//self->pszString = pszText;
+	char* tempString = strdup(pszText);
+	free(self->pszString);
+	self->pszString = tempString;
 }
 
 ULONG NODE_GetInt(NODE* self)
@@ -512,35 +530,52 @@ int findNodeCountInString(char* pszNodeData)
 	return iNodeCount;
 }
 
-void sortNodeChildren(NODE* nodeParent)
+void addNodeSortedPosition(NODE* nodeParent, NODE* newNode)
 {
-	if(nodeParent == NULL) { return; }
+	if(nodeParent == NULL || newNode == NULL) { return; }
+	if(nodeParent->iNodes <= 0) { nodeParent->pnNodes[0] = newNode; return;};
 	
-	int iSortedIndex = 0;
-	int iSelectedIndex = 0;
-	
-	while(nodeParent->iNodes > iSortedIndex)
+	for(int i = 0; i <= nodeParent->iNodes; i++)
 	{
-		iSelectedIndex = iSortedIndex;
-		for(int i = iSortedIndex; i < nodeParent->iNodes; i++)
-		{
-			if(strcasecmp(nodeParent->pnNodes[i]->pszName, nodeParent->pnNodes[iSelectedIndex]->pszName) > 0)
-			{
-				iSelectedIndex = i;
-			}
-				
-		}
+		//printf("Compare: %s ? %s = %d\n", newNode->pszName, nodeParent->pnNodes[i]->pszName, (strcasecmp(newNode->pszName, nodeParent->pnNodes[i]->pszName)));
 		
-		printf("Swap: %s med %s\n", nodeParent->pnNodes[iSortedIndex]->pszName, nodeParent->pnNodes[iSelectedIndex]->pszName);
-		swap(nodeParent->pnNodes[iSortedIndex], nodeParent->pnNodes[iSelectedIndex]);
-		iSortedIndex++;
+		if(nodeParent->pnNodes[i] == NULL)
+		{
+			nodeParent->pnNodes[i] = newNode;
+			return;
+		}	
+		else if(strcasecmp(newNode->pszName, nodeParent->pnNodes[i]->pszName) < 0)
+		{
+			shiftArray(RIGHT, nodeParent, i);
+			nodeParent->pnNodes[i] = newNode;
+			return;
+		}
 	}
 }
 
-void swap(NODE* a, NODE* b)
+void shiftArray(int iDirection, NODE* nodeParent, int iIndex)
 {
-	NODE* swap = a;
-	a = b;
-	b = swap;
+	if(nodeParent == NULL) { return; }
+	
+	if(iDirection == LEFT)
+	{
+		for(int i = iIndex; i < nodeParent->iNodes; i++)
+		{
+			nodeParent->pnNodes[i] = nodeParent->pnNodes[i+1];
+		}
+	}
+	else // Righ shift
+	{
+		for(int i = nodeParent->iNodes; i > iIndex; i--)
+		{
+			if(nodeParent->pnNodes[i-1] != NULL && (i-1) >= 0)
+			{
+				nodeParent->pnNodes[i] = nodeParent->pnNodes[i-1];
+				printf("ShiftArray: "); 
+				nodeParent->pnNodes[i]->Print(nodeParent->pnNodes[i]);
+			}
+		}
+	}
 }
+
 //TODO: Make a stripqoutes function
