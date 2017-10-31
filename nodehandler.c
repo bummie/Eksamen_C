@@ -1,3 +1,6 @@
+// 	Sebastian S. Berge - Eksamen: "C programmering i Linux"
+//	31.10.2017
+
 #include "nodehandler.h"
 
 // Global variables
@@ -90,7 +93,7 @@ void Delete(char* nodeKey)
 			DeleteByNode(nodeDelete->pnNodes[i]);
 		}
 	}
-	printf("Sletter_NODE: %s\n", nodeDelete->pszName);
+	printf("Deleting_NODE: %s\n", nodeDelete->pszName);
 	destructNode(nodeDelete);
 	
 	// Remove one from parentnodecount
@@ -126,7 +129,7 @@ void DeleteByNode(NODE* nodeDelete)
 		}
 	}
 	
-	printf("Sletter_barn: %s\n", nodeDelete->pszName);
+	printf("Deleting_NODE_CHILD: %s\n", nodeDelete->pszName);
 	destructNode(nodeDelete);
 }
 
@@ -190,20 +193,14 @@ void Enumerate(char* nodeKey, void (*Callback)(char* nodeName, void* nodeValue))
 	}
 }
 
+// Prints out the given node
 void callbackPrint(char* nodeName, void* nodeValue)
 {
 	if(nodeName == NULL || nodeValue == NULL) { return; }
 	NODE* callbackNode = findNodeByKey(nodeName);
 	if(callbackNode == NULL) { return; }
-
-	if(callbackNode->GetType(callbackNode) == TYPE_NUMERIC)
-	{
-		printf("Callback_Node: %s, Value: %d\n", nodeName, nodeValue);
-	}
-	else if(callbackNode->GetType(callbackNode) == TYPE_STRING)
-	{
-		printf("Callback_Node: %s, Value: %s\n", nodeName, nodeValue);
-	}
+	
+	callbackNode->Print(callbackNode);
 }
 
 NODE* findNodeByKey(char* nodeKey)
@@ -328,7 +325,7 @@ void NODE_SetValue(NODE* self, int iValueType, void* nodeValue)
 	
 	if(iValueType == TYPE_NUMERIC)
 	{
-		self->SetInt(self, *((int*) nodeValue));
+		self->SetInt(self, *((ULONG*) nodeValue));
 	}
 	else if(iValueType == TYPE_STRING)
 	{
@@ -365,10 +362,11 @@ void NODE_Print(NODE* self)
 	else if(self->GetType(self) == TYPE_NUMERIC)
 	{
 		printf("[%s]: Type: Numeric, Children: %d, Value: %d\n", self->pszName, self->iNodes, self->GetInt(self));
-	}
+	}// 	Sebastian S. Berge - Eksamen: "C programmering i Linux"
+//	31.10.2017
 	else if(self->GetType(self) == TYPE_STRING)
 	{
-		printf("[%s]: Type: Text, Children: %d, Value: %s\n", self->pszName, self->iNodes, self->GetString(self));
+		printf("[%s]: Type: Text, Children: %d, Value: \"%s\"\n", self->pszName, self->iNodes, self->GetString(self));
 	}
 }
 
@@ -385,7 +383,6 @@ NODE* loadNodesFromFile(char* filePath)
 	while(cReadStatus = getline(&sBuffer, &iLineLength, fFile) != -1)
 	{
 		parseNodeData(sBuffer);
-		printf("\n");
 	}
 	
 	free(sBuffer);
@@ -397,7 +394,7 @@ FILE* loadFile(char* filePath)
 {
 	if(filePath == NULL)
 	{
-		printf("Filplassering kan ikke være NULL\n");
+		printf("Filepath can not be NULL\n");
 		return NULL;
 	}
 	
@@ -405,31 +402,27 @@ FILE* loadFile(char* filePath)
 	
 	if(fFile == NULL)
 	{
-		printf("Filplassering var ikke gyldig\n");
+		printf("Filepath is not legit\n");
 		return NULL;
 	}
 	
 	return fFile;	
 }
 
+// Creates nodes from inputted line
 int parseNodeData(char* pszNodeData)
 {
-	if(pszNodeData == NULL)
-		return 0;
+	if(pszNodeData == NULL) { return 0; }
 	
 	int iNodeCount = findNodeCountInString(pszNodeData);
-	//printf("NodeCount: %d\n", iNodeCount);
 	char* nodeNames = findNodeNames(pszNodeData, iNodeCount);
-	
 	NODE* tempNode = rootNode;
+	
 	for(int i = 0; i < iNodeCount; i++)
 	{
-		printf("%s\n", &nodeNames[i*NODE_NAME_BUFFER_SIZE]);
-		printf("AddNodeState: %d\n", addNode(tempNode, newNode(&nodeNames[i*NODE_NAME_BUFFER_SIZE])));
+		addNode(tempNode, newNode(&nodeNames[i*NODE_NAME_BUFFER_SIZE]));
 		tempNode = tempNode->GetChildWithKey(tempNode, &nodeNames[i*NODE_NAME_BUFFER_SIZE]);
 		if(tempNode == NULL) { break; }
-		
-		printf("StringNameFromNode: %s\n", tempNode->pszName);
 	}
 	
 	// Set value of node
@@ -444,6 +437,7 @@ int parseNodeData(char* pszNodeData)
 			tempNode->SetInt(tempNode, ulValue);
 		}else
 		{
+			stripStringQuotes(nodeValue);
 			tempNode->SetString(tempNode, nodeValue);
 		}
 	}
@@ -457,7 +451,7 @@ int parseNodeData(char* pszNodeData)
 	return 1;
 }
 
-//TODO: Clean up
+// Finds the value to append a given node from fileline 
 char* findNodeValue(char* pszNodeData)
 {
 	char* sNodeValue = malloc(NODE_NAME_BUFFER_SIZE);
@@ -502,7 +496,7 @@ char* findNodeValue(char* pszNodeData)
 	return sNodeValue;
 }
 
-//TODO: Clean up
+// Finds the names from fileline returns names in an array
 char* findNodeNames(char* pszNodeData, int iNodeCount)
 {
 	char* asNodeNames = malloc(iNodeCount * NODE_NAME_BUFFER_SIZE);
@@ -573,6 +567,7 @@ void addNodeSortedPosition(NODE* nodeParent, NODE* newNode)
 	}
 }
 
+// Moves the nodes children either right og left from given index
 void shiftArray(int iDirection, NODE* nodeParent, int iIndex)
 {
 	if(nodeParent == NULL) { return; }
@@ -591,8 +586,6 @@ void shiftArray(int iDirection, NODE* nodeParent, int iIndex)
 			if(nodeParent->pnNodes[i-1] != NULL && (i-1) >= 0)
 			{
 				nodeParent->pnNodes[i] = nodeParent->pnNodes[i-1];
-				printf("ShiftArray: "); 
-				nodeParent->pnNodes[i]->Print(nodeParent->pnNodes[i]);
 			}
 		}
 	}
@@ -616,6 +609,7 @@ char* getParentByNodeKey(char* nodeKey)
 	return sKeyDupe;
 }
 
+// Gives the index where the childNode is located in parentNode
 int getNodeIndexFromParent(NODE* parentNode, NODE* childNode)
 {
 	if(parentNode ==  NULL || childNode == NULL) { return NULL; }
@@ -633,4 +627,11 @@ int getNodeIndexFromParent(NODE* parentNode, NODE* childNode)
 	
 	return iIndex;
 }
-//TODO: Make a stripqoutes function
+
+// Removes quotation marks from string
+void stripStringQuotes(char* pszString)
+{
+	if(pszString == NULL) { printf("String is null"); return; }
+	memmove(pszString, pszString+1, strlen(pszString));
+	pszString[strlen(pszString)-1] = '\0';
+}

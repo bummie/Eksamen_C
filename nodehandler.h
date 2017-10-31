@@ -1,3 +1,5 @@
+// 	Sebastian S. Berge - Eksamen: "C programmering i Linux"
+//	31.10.2017
 #ifndef _NODEHANDLER_H_
 #define _NODEHANDLER_H_
 
@@ -7,7 +9,6 @@
 
 #define NODE_NAME_BUFFER_SIZE 256
 #define NODE_CHILD_SIZE_INCREMENTER 5
-#define FILEPATH "../Data/data.txt"
 #define FALSE 0
 #define TRUE !FALSE
 #define LEFT 0
@@ -64,6 +65,7 @@ void shiftArray(int iDirection, NODE* nodeParent, int iIndex);
 void addNodeSortedPosition(NODE* nodeParent, NODE* newNode);
 char* getParentByNodeKey(char* nodeKey);
 int getNodeIndexFromParent(NODE* parentNode, NODE* childNode);
+void stripStringQuotes(char* pszString);
 
 // Pointer Functions
 NODE* NODE_GetChildWithKey(NODE* self, char* sKey);

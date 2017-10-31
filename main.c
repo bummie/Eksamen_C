@@ -1,8 +1,12 @@
+// 	Sebastian S. Berge - Eksamen: "C programmering i Linux"
+//	31.10.2017
+
 #include "nodehandler.h"
+#define FILEPATH "../Data/data.txt"
 
 int main(void)
 {
-	// Init root mode
+	// Part 1
 	init();
 	loadNodesFromFile(FILEPATH);
 	
