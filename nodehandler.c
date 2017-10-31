@@ -11,7 +11,7 @@ void init()
 	rootNode = newNode("root");
 }
 
-// Node
+// Node constructor
 NODE* newNode(char* pszName)
 {
 	NODE* node = calloc(1, sizeof(NODE));
@@ -39,6 +39,7 @@ NODE* newNode(char* pszName)
 	return node;
 }
 
+// Destroys node and frees memory
 void destructNode(NODE* nNode)
 {
 	free(nNode->pnNodes);
@@ -71,6 +72,7 @@ int addNode(NODE* nodeDestination, NODE* node)
 	return 1;
 }
 
+// Deletes node and nodes children
 void Delete(char* nodeKey)
 {
 	if(nodeKey == NULL) { return; };
@@ -116,6 +118,7 @@ void Delete(char* nodeKey)
 	}
 }
 
+// Recursivly deletes childnodes
 void DeleteByNode(NODE* nodeDelete)
 {
 	if(nodeDelete == NULL) { return; };
@@ -133,6 +136,7 @@ void DeleteByNode(NODE* nodeDelete)
 	destructNode(nodeDelete);
 }
 
+// Returns the string for given code and language
 char* GetText(char* nodeName, char* nodeLangCode)
 {
 	if(nodeName == NULL || nodeLangCode == NULL) { return; }
@@ -434,11 +438,11 @@ int parseNodeData(char* pszNodeData)
 		
 		if(*sExtraChars == '\0' || *sExtraChars == '\n')
 		{
-			tempNode->SetInt(tempNode, ulValue);
+			tempNode->SetValue(tempNode, TYPE_NUMERIC, &ulValue);
 		}else
 		{
 			stripStringQuotes(nodeValue);
-			tempNode->SetString(tempNode, nodeValue);
+			tempNode->SetValue(tempNode, TYPE_STRING, nodeValue);
 		}
 	}
 	//printf("Value: %s\n", nodeValue);

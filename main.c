@@ -8,13 +8,23 @@ int main(void)
 {
 	// Part 1
 	init();
+	
+	// Creates the nodes in sorted order from file
+	// Using SetValue to give the nodes value
 	loadNodesFromFile(FILEPATH);
 	
-	NODE* nodeNameTest = findNodeByKey("config.update.server1"); 
-	nodeNameTest->Print(nodeNameTest);
+	//Setters and getters
+	NODE* nodeTest = findNodeByKey("config.update.server1"); 
+	nodeTest->Print(nodeTest);
+	
 	ULONG testVal = 120;
-	nodeNameTest->SetValue(nodeNameTest, TYPE_NUMERIC, &testVal);
-	nodeNameTest->Print(nodeNameTest);
+	nodeTest->SetValue(nodeTest, TYPE_NUMERIC, &testVal);
+	nodeTest->Print(nodeTest);
+	nodeTest->SetValue(nodeTest, TYPE_STRING, "TestNode er noden!");
+	nodeTest->Print(nodeTest);
+	
+	// Part 2
+	// Enumerator
 	Enumerate("strings.en.*", callbackPrint);
 	Enumerate("strings.no.header", callbackPrint);
 	
