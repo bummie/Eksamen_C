@@ -11,13 +11,17 @@ int main(void)
 	ULONG testVal = 120;
 	nodeNameTest->SetValue(nodeNameTest, TYPE_NUMERIC, &testVal);
 	nodeNameTest->Print(nodeNameTest);
-	Enumerate("config.update.*", callbackPrint);
+	Enumerate("strings.en.*", callbackPrint);
 	Enumerate("strings.no.header", callbackPrint);
 	
 	printf("Button_cancel: %s\n", GetText("button_ok", "no"));
+	printf("EN: Arraysize: %d\n", findNodeByKey("strings.en")->iArraySizeChildNodes);
+	Delete("strings.en.katt");
+	Delete("strings.en.ape");
+	Delete("strings.en.test");
+	Enumerate("strings.en.*", callbackPrint);
+	printf("EN: Arraysize: %d\n", findNodeByKey("strings.en")->iArraySizeChildNodes);
 	
-	Delete("config.update");
-		
 	getchar();
 	return 0;
 }

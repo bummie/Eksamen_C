@@ -23,6 +23,7 @@ NODE* newNode(char* pszName)
 	// Functions
 	node->GetChildWithKey = NODE_GetChildWithKey;
 	node->IncreaseChildArray = NODE_IncreaseChildArraySize;
+	node->DecreaseChildArray = NODE_DecreaseChildArraySize;
 	node->SetInt = NODE_SetInt;
 	node->SetString = NODE_SetString;
 	node->GetInt = NODE_GetInt;
@@ -62,25 +63,8 @@ int addNode(NODE* nodeDestination, NODE* node)
 		nodeDestination->IncreaseChildArray(nodeDestination);
 	}
 	
-	
 	addNodeSortedPosition(nodeDestination, node);
-	//nodeDestination->pnNodes[nodeDestination->iNodes] = node;
 	nodeDestination->iNodes++;
-	
-	printf("Array_START: %s\n", nodeDestination->pszName);
-	for(int i = 0; i < nodeDestination->iNodes; i++)
-	{
-		if(nodeDestination->pnNodes[i] != NULL)
-		{
-			printf("I: %d: ", i);
-			nodeDestination->pnNodes[i]->Print(nodeDestination->pnNodes[i]);
-		}
-		else
-			printf("NULL\n");
-	}
-	printf("Array_END\n\n");
-	
-		
 	return 1;
 }
 
@@ -90,6 +74,13 @@ void Delete(char* nodeKey)
 	
 	NODE* nodeDelete = findNodeByKey(nodeKey);
 	if(nodeDelete == NULL) { return; }
+	
+	// TODO: Make a new function for this shizz
+	char* sParentKey = getParentByNodeKey(nodeKey);
+	NODE* parentNode = findNodeByKey(sParentKey);
+	
+	int iIndex = getNodeIndexFromParent(parentNode, nodeDelete);
+	if(iIndex == -1) { return; }
 	
 	// Delete babies first
 	if(nodeDelete->iNodes > 0)
@@ -102,9 +93,24 @@ void Delete(char* nodeKey)
 	printf("Sletter_NODE: %s\n", nodeDelete->pszName);
 	destructNode(nodeDelete);
 	
-	//TODO: Oppdatere forelder om at barnet er dødt
-	//TODO: Sortere barnene til forelder, så ingen hull
-	//TODO: Decrase size om antallerer mindre
+	// Remove one from parentnodecount
+	if(parentNode != NULL)
+	{
+		if(parentNode->iNodes > 0)
+		{
+			parentNode->iNodes--;
+		}
+	}
+	
+	free(sParentKey);
+	shiftArray(LEFT, parentNode, iIndex);
+	
+	// If nodes childrens array is full, increase
+	if(parentNode->iNodes <= (parentNode->iArraySizeChildNodes - NODE_CHILD_SIZE_INCREMENTER))
+	{
+		printf("'%s' is wasting space, decreasing size\n", parentNode->pszName);
+		parentNode->DecreaseChildArray(parentNode);
+	}
 }
 
 void DeleteByNode(NODE* nodeDelete)
@@ -241,7 +247,6 @@ NODE* NODE_GetChildWithKey(NODE* self, char* sKey)
 // Function pointers
 void NODE_IncreaseChildArraySize(NODE* self)
 {
-	//TODO: Fikse increase størrelsen
 	if(self == NULL) { return; }
 	int iNewSize = (self->iArraySizeChildNodes + NODE_CHILD_SIZE_INCREMENTER);
 	NODE* nodeReallocated = realloc(self->pnNodes, iNewSize * sizeof(NODE*));
@@ -249,9 +254,26 @@ void NODE_IncreaseChildArraySize(NODE* self)
 	if(nodeReallocated != NULL)
 	{
 		self->pnNodes = nodeReallocated;
+		self->iArraySizeChildNodes = iNewSize;
 	}else
 	{
 		printf("Could not increase childrenArray");
+	}
+}
+
+void NODE_DecreaseChildArraySize(NODE* self)
+{
+	if(self == NULL) { return; }
+	int iNewSize = (self->iArraySizeChildNodes - NODE_CHILD_SIZE_INCREMENTER);
+	NODE* nodeReallocated = realloc(self->pnNodes, iNewSize * sizeof(NODE*));
+	
+	if(nodeReallocated != NULL)
+	{
+		self->pnNodes = nodeReallocated;
+		self->iArraySizeChildNodes = iNewSize;
+	}else
+	{
+		printf("Could not decrease childrenArray");
 	}
 }
 
@@ -427,7 +449,7 @@ int parseNodeData(char* pszNodeData)
 	}
 	//printf("Value: %s\n", nodeValue);
 	
-	// Fre memory
+	// Free memory
 	free(nodeNames);
 	nodeNames = NULL;
 	free(nodeValue);
@@ -536,9 +558,7 @@ void addNodeSortedPosition(NODE* nodeParent, NODE* newNode)
 	if(nodeParent->iNodes <= 0) { nodeParent->pnNodes[0] = newNode; return;};
 	
 	for(int i = 0; i <= nodeParent->iNodes; i++)
-	{
-		//printf("Compare: %s ? %s = %d\n", newNode->pszName, nodeParent->pnNodes[i]->pszName, (strcasecmp(newNode->pszName, nodeParent->pnNodes[i]->pszName)));
-		
+	{		
 		if(nodeParent->pnNodes[i] == NULL)
 		{
 			nodeParent->pnNodes[i] = newNode;
@@ -578,4 +598,39 @@ void shiftArray(int iDirection, NODE* nodeParent, int iIndex)
 	}
 }
 
+// Takes a node key "strings.en.text" and removes the last node
+char* getParentByNodeKey(char* nodeKey)
+{
+	if(nodeKey == NULL && strcasecmp(nodeKey, "root") != 0) { return NULL; }
+	
+	char* sKeyDupe = strdup(nodeKey);
+	
+	for(int i = strlen(sKeyDupe); i > 0; i-- )
+	{
+		if(sKeyDupe[i] == '.')
+		{
+			sKeyDupe[i] = '\0';
+			break;
+		}
+	}
+	return sKeyDupe;
+}
+
+int getNodeIndexFromParent(NODE* parentNode, NODE* childNode)
+{
+	if(parentNode ==  NULL || childNode == NULL) { return NULL; }
+	
+	int iIndex = -1;
+	
+	for(int i = 0; i < parentNode->iNodes; i++)
+	{
+		if(strcasecmp(parentNode->pnNodes[i]->pszName, childNode->pszName) == 0)
+		{
+			iIndex = i;
+			break;
+		}
+	}
+	
+	return iIndex;
+}
 //TODO: Make a stripqoutes function

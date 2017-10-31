@@ -32,6 +32,7 @@ typedef struct _NODE
 	//Function pointers
 	struct _NODE* (*GetChildWithKey)(struct _NODE* self, char* key);
 	void (*IncreaseChildArray)(struct _NODE* self);
+	void (*DecreaseChildArray)(struct _NODE* self);
 	void (*SetInt)(struct _NODE* self, ULONG ulValue);
 	void (*SetString)(struct _NODE* self, char* pszText);
 	ULONG (*GetInt)(struct _NODE* self);
@@ -61,10 +62,13 @@ void sortNodeChildren(NODE* nodeParent);
 void swap(NODE* a, NODE* b);
 void shiftArray(int iDirection, NODE* nodeParent, int iIndex);
 void addNodeSortedPosition(NODE* nodeParent, NODE* newNode);
+char* getParentByNodeKey(char* nodeKey);
+int getNodeIndexFromParent(NODE* parentNode, NODE* childNode);
 
 // Pointer Functions
 NODE* NODE_GetChildWithKey(NODE* self, char* sKey);
 void NODE_IncreaseChildArraySize(NODE* self);
+void NODE_DecreaseChildArraySize(NODE* self);
 void NODE_SetInt(NODE* self, ULONG ulValue);
 void NODE_SetString(NODE* self, char* pszText);
 ULONG NODE_GetInt(NODE* self);
