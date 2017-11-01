@@ -153,6 +153,7 @@ char* GetText(char* nodeName, char* nodeLangCode)
 		snprintf(nodeKey, (sizeof(nodeKey)-1), "%s.%s.%s", "strings", "en", nodeName);
 		nodeLang = findNodeByKey(nodeKey);
 	}
+	if(nodeLang == NULL){ return NULL; }
 	return nodeLang->GetValue(nodeLang);
 }
 
@@ -641,4 +642,21 @@ void stripStringQuotes(char* pszString)
 	if(pszString == NULL) { printf("String is null"); return; }
 	memmove(pszString, pszString+1, strlen(pszString));
 	pszString[strlen(pszString)-1] = '\0';
+}
+
+// Prints node with children
+void PrintNodeWithChildren(NODE* node)
+{
+	if(node == NULL) { return; }
+	node->Print(node);
+	for(int i = 0; i < node->iNodes; i++)
+	{
+		PrintNodeWithChildren(node->pnNodes[i]);
+	}
+}
+
+// Returns the rootnode
+NODE* GetRootNode()
+{
+	return rootNode;
 }

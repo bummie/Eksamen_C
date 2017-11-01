@@ -66,6 +66,8 @@ void addNodeSortedPosition(NODE* nodeParent, NODE* newNode);
 char* getParentByNodeKey(char* nodeKey);
 int getNodeIndexFromParent(NODE* parentNode, NODE* childNode);
 void stripStringQuotes(char* pszString);
+void PrintNodeWithChildren(NODE* node);
+NODE* GetRootNode();
 
 // Pointer Functions
 NODE* NODE_GetChildWithKey(NODE* self, char* sKey);
