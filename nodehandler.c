@@ -379,10 +379,10 @@ void NODE_Print(NODE* self)
 }
 
 // Filehandling
-NODE* loadNodesFromFile(char* filePath)
+int loadNodesFromFile(char* filePath)
 {
 	FILE* fFile = loadFile(filePath);
-	if(fFile == NULL){return NULL;}
+	if(fFile == NULL){return 0;}
 	
 	char* sBuffer = malloc(1024);
 	size_t iLineLength;
@@ -390,7 +390,7 @@ NODE* loadNodesFromFile(char* filePath)
 	
 	while(cReadStatus = getline(&sBuffer, &iLineLength, fFile) != -1)
 	{
-		// Dont reas comments
+		// Dont read comments
 		if(sBuffer[0] == '/' && sBuffer[1] == '/') { continue; }
 		parseNodeData(sBuffer);
 	}
@@ -398,6 +398,7 @@ NODE* loadNodesFromFile(char* filePath)
 	free(sBuffer);
 	sBuffer = NULL;
 	fclose(fFile);
+	return 1;
 }
 
 FILE* loadFile(char* filePath)

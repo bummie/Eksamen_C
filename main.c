@@ -13,7 +13,7 @@ int main(void)
 	
 	// Creates the nodes in sorted order from file
 	// Using SetValue to give the nodes value
-	loadNodesFromFile(FILEPATH);
+	if(!loadNodesFromFile(FILEPATH)) { printf("Could not load file\n"); getchar(); return 1;}
 	printf("Loaded nodes from file: %s\n", FILEPATH);
 	
 	//Setters and getters
@@ -80,8 +80,8 @@ int main(void)
 	
 	printf("\n\nEXTRA: Prints all nodes in tree\n");
 	PrintNodeWithChildren(GetRootNode());
-	printf("\n\nPress any key to exit..");
 	
+	printf("\n\nPress any key to exit..");
 	getchar();
 	return 0;
 }

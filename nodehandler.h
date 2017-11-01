@@ -47,7 +47,7 @@ typedef struct _NODE
 
 // Headers
 FILE* loadFile(char* filePath);
-NODE* loadNodesFromFile(char* filePath);
+int loadNodesFromFile(char* filePath);
 int findNodeCountInString(char* pszNodeData);
 int parseNodeData(char* pszNodeData);
 char* findNodeNames(char* pszNodeData, int iNodeCount);
