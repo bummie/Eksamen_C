@@ -235,7 +235,10 @@ NODE* NODE_GetChildWithKey(NODE* self, char* sKey)
 	for(int i = 0; i < self->iNodes; i++)
 	{
 		NODE* tempNode = self->pnNodes[i];
-		if(strcasecmp(tempNode->pszName, sKey) == 0)// TODO: Binary search 
+		
+		// Since array is sorted, stop when we have reached the last possibly position
+		if(strcasecmp(tempNode->pszName, sKey) > 0) { break; }
+		if(strcasecmp(tempNode->pszName, sKey) == 0) 
 		{
 			nodeChild = tempNode;
 			break;
