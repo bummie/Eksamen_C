@@ -1,3 +1,6 @@
+// Strings
+// Test with many spaces
+ 
 strings.no.header   =     "Oppdatering"
 strings.no.text =     "Oppdater programvare"
 strings.no.button_cancel = "Avbryt"
@@ -9,11 +12,15 @@ strings.en.hello = "Hello World"
 strings.en.test = "Test"
 strings.en.ape = "Monkey"
 strings.en.katt = "Kitten"
+
+//Config data
 config.loglevel = 1
 config.update.zebra    =   1337
 config.update.interval = 32
 config.update.server1 = "http://www.aspenberg.no/"
 config.update.timeout = 20
+
+//Client data
 client.amount = 123
 client.nation.norway.name = "Norway"
 client.nation.norway.code = "NO"

@@ -390,6 +390,8 @@ NODE* loadNodesFromFile(char* filePath)
 	
 	while(cReadStatus = getline(&sBuffer, &iLineLength, fFile) != -1)
 	{
+		// Dont reas comments
+		if(sBuffer[0] == '/' && sBuffer[1] == '/') { continue; }
 		parseNodeData(sBuffer);
 	}
 	
