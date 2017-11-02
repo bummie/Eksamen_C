@@ -229,7 +229,10 @@ NODE* findNodeByKey(char* nodeKey)
 	return node;
 }
 
-// Function pointers
+// 
+//	Function pointers
+//
+
 NODE* NODE_GetChildWithKey(NODE* self, char* sKey)
 {
 	NODE* nodeChild = NULL;
@@ -249,7 +252,6 @@ NODE* NODE_GetChildWithKey(NODE* self, char* sKey)
 	return nodeChild;
 }
 
-// Function pointers
 void NODE_IncreaseChildArraySize(NODE* self)
 {
 	if(self == NULL) { return; }
@@ -359,6 +361,7 @@ int NODE_GetType(NODE* self)
 	}
 }
 
+// Prints out information about node
 void NODE_Print(NODE* self)
 {
 	if(self == NULL) { printf("Print failed: Node is null\n"); return NULL; }
@@ -369,12 +372,11 @@ void NODE_Print(NODE* self)
 	}
 	else if(self->GetType(self) == TYPE_NUMERIC)
 	{
-		printf("[%s]: Type: Numeric, Children: %d, Value: %d\n", self->pszName, self->iNodes, self->GetInt(self));
-	}// 	Sebastian S. Berge - Eksamen: "C programmering i Linux"
-//	31.10.2017
+		printf("[%s]: Type: Numeric, Children: %d, Value: %d\n", self->pszName, self->iNodes, self->GetValue(self));
+	}
 	else if(self->GetType(self) == TYPE_STRING)
 	{
-		printf("[%s]: Type: Text, Children: %d, Value: \"%s\"\n", self->pszName, self->iNodes, self->GetString(self));
+		printf("[%s]: Type: Text, Children: %d, Value: \"%s\"\n", self->pszName, self->iNodes, self->GetValue(self));
 	}
 }
 
@@ -401,6 +403,7 @@ int loadNodesFromFile(char* filePath)
 	return 1;
 }
 
+// Tries to load a file, returns NULL if it could not load file
 FILE* loadFile(char* filePath)
 {
 	if(filePath == NULL)
@@ -452,7 +455,6 @@ int parseNodeData(char* pszNodeData)
 			tempNode->SetValue(tempNode, TYPE_STRING, nodeValue);
 		}
 	}
-	//printf("Value: %s\n", nodeValue);
 	
 	// Free memory
 	free(nodeNames);
@@ -468,9 +470,9 @@ char* findNodeValue(char* pszNodeData)
 	char* sNodeValue = malloc(NODE_NAME_BUFFER_SIZE);
 	char cBuffer[NODE_NAME_BUFFER_SIZE];
 	int iBufferIndex = 0;
-	int iFoundCharEquals = 0;
-	int iFoundStartValue = 0;
-	int iFoundStartString = 0;
+	int iFoundCharEquals = FALSE;
+	int iFoundStartValue = FALSE;
+	int iFoundStartString = FALSE;
 	for(int i = 0; i < strlen(pszNodeData); i++)
 	{
 		if(pszNodeData[i] == '=')
@@ -491,8 +493,8 @@ char* findNodeValue(char* pszNodeData)
 			// End of numeric value
 			if(!iFoundStartString && iFoundStartValue && pszNodeData[i] == ' '){ break; }
 			
-			if(!iFoundStartString && pszNodeData[i] == '"'){ iFoundStartString = 1; }
-			if(pszNodeData[i] != ' ' && !iFoundStartValue) { iFoundStartValue = 1; }
+			if(!iFoundStartString && pszNodeData[i] == '"'){ iFoundStartString = TRUE; }
+			if(pszNodeData[i] != ' ' && !iFoundStartValue) { iFoundStartValue = TRUE; }
 				
 			if(iFoundStartValue)// && pszNodeData[i] != '"')
 			{
@@ -542,9 +544,9 @@ char* findNodeNames(char* pszNodeData, int iNodeCount)
 	return asNodeNames;
 }
 
+// Finding the count of nodenames by amount of '.'
 int findNodeCountInString(char* pszNodeData)
 {
-	
 	int iNodeCount = 1;
 	for(int i = 0; i < strlen(pszNodeData); i++)
 	{
@@ -557,6 +559,7 @@ int findNodeCountInString(char* pszNodeData)
 	return iNodeCount;
 }
 
+// Adds the node into its sorted position
 void addNodeSortedPosition(NODE* nodeParent, NODE* newNode)
 {
 	if(nodeParent == NULL || newNode == NULL) { return; }
