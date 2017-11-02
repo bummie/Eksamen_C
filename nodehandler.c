@@ -80,7 +80,6 @@ void Delete(char* nodeKey)
 	NODE* nodeDelete = findNodeByKey(nodeKey);
 	if(nodeDelete == NULL) { return; }
 	
-	// TODO: Make a new function for this shizz
 	char* sParentKey = getParentByNodeKey(nodeKey);
 	NODE* parentNode = findNodeByKey(sParentKey);
 	
@@ -286,7 +285,6 @@ void NODE_DecreaseChildArraySize(NODE* self)
 
 void NODE_SetInt(NODE* self, ULONG ulValue)
 {
-	//TODO: Fikse increase størrelsen
 	if(self == NULL || ulValue == NULL) { return; }
 	self->ulIntVal = ulValue;
 	self->pszString = NULL;
@@ -294,7 +292,6 @@ void NODE_SetInt(NODE* self, ULONG ulValue)
 
 void NODE_SetString(NODE* self, char* pszText)
 {
-	//TODO: Fikse increase størrelsen
 	if(self == NULL || pszText == NULL) { return; }
 	char* tempString = strdup(pszText);
 	free(self->pszString);
@@ -372,7 +369,7 @@ void NODE_Print(NODE* self)
 	}
 	else if(self->GetType(self) == TYPE_NUMERIC)
 	{
-		printf("[%s]: Type: Numeric, Children: %d, Value: %d\n", self->pszName, self->iNodes, self->GetValue(self));
+		printf("[%s]: Type: Numeric, Children: %d, Value: %lu\n", self->pszName, self->iNodes, self->GetValue(self));
 	}
 	else if(self->GetType(self) == TYPE_STRING)
 	{
